@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="e382a928-c166-4ab6-a6e3-8c9f89006f9c" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?wsdl" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="6cd61c25-60bf-4a72-86f0-a294fd70b4a9" SourceId="1" SourceUrl="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd2" />
+    <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="c434e702-ba4a-450b-a6f2-6f8c200af012" SourceId="1" SourceUrl="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd3" />
+    <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="55a32778-1e00-4152-a4f0-ccfd3928e72f" SourceId="1" SourceUrl="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd0" />
+    <MetadataFile FileName="EngrDrwTIFSvc.wsdl" MetadataType="Wsdl" ID="e0dda201-f2fb-4163-a4fb-34b67b8778b7" SourceId="1" SourceUrl="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?wsdl" />
+    <MetadataFile FileName="item3.xsd" MetadataType="Schema" ID="919028f8-13f5-4423-b4cb-a6512b51032d" SourceId="1" SourceUrl="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd1" />
+    <MetadataFile FileName="item4.xsd" MetadataType="Schema" ID="eaf841b3-045f-4e39-8d33-d88c84798e6b" SourceId="1" SourceUrl="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd4" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

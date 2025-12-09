@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="EngrDrwTIFSvc" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/EngrDrwTIFService" />
+      <xsd:import schemaLocation="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/HesCapeWS" />
+      <xsd:import schemaLocation="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IEngrDrwTIFSvc_RetCachedList_InputMessage">
+    <wsdl:part name="parameters" element="tns:RetCachedList" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetCachedList_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RetCachedListResponse" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_AddToCache_InputMessage">
+    <wsdl:part name="parameters" element="tns:AddToCache" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_AddToCache_OutputMessage">
+    <wsdl:part name="parameters" element="tns:AddToCacheResponse" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPkt_InputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPkt" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPkt_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPktResponse" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPkt2_InputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPkt2" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPkt2_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPkt2Response" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPktPDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPktPDF" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPktPDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPktPDFResponse" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPktPDF2_InputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPktPDF2" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_RetDrawingPktPDF2_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RetDrawingPktPDF2Response" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_DrwPDFPaths_InputMessage">
+    <wsdl:part name="parameters" element="tns:DrwPDFPaths" />
+  </wsdl:message>
+  <wsdl:message name="IEngrDrwTIFSvc_DrwPDFPaths_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DrwPDFPathsResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IEngrDrwTIFSvc">
+    <wsdl:operation name="RetCachedList">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetCachedList" message="tns:IEngrDrwTIFSvc_RetCachedList_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetCachedListResponse" message="tns:IEngrDrwTIFSvc_RetCachedList_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="AddToCache">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/AddToCache" message="tns:IEngrDrwTIFSvc_AddToCache_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/AddToCacheResponse" message="tns:IEngrDrwTIFSvc_AddToCache_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPkt">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPkt" message="tns:IEngrDrwTIFSvc_RetDrawingPkt_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktResponse" message="tns:IEngrDrwTIFSvc_RetDrawingPkt_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPkt2">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPkt2" message="tns:IEngrDrwTIFSvc_RetDrawingPkt2_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPkt2Response" message="tns:IEngrDrwTIFSvc_RetDrawingPkt2_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPktPDF">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktPDF" message="tns:IEngrDrwTIFSvc_RetDrawingPktPDF_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktPDFResponse" message="tns:IEngrDrwTIFSvc_RetDrawingPktPDF_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPktPDF2">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktPDF2" message="tns:IEngrDrwTIFSvc_RetDrawingPktPDF2_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktPDF2Response" message="tns:IEngrDrwTIFSvc_RetDrawingPktPDF2_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DrwPDFPaths">
+      <wsdl:input wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/DrwPDFPaths" message="tns:IEngrDrwTIFSvc_DrwPDFPaths_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IEngrDrwTIFSvc/DrwPDFPathsResponse" message="tns:IEngrDrwTIFSvc_DrwPDFPaths_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IEngrDrwTIFSvc" type="tns:IEngrDrwTIFSvc">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="RetCachedList">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/RetCachedList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddToCache">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/AddToCache" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPkt">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPkt" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPkt2">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPkt2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPktPDF">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktPDF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RetDrawingPktPDF2">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/RetDrawingPktPDF2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DrwPDFPaths">
+      <soap:operation soapAction="http://tempuri.org/IEngrDrwTIFSvc/DrwPDFPaths" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="EngrDrwTIFSvc">
+    <wsdl:port name="BasicHttpBinding_IEngrDrwTIFSvc" binding="tns:BasicHttpBinding_IEngrDrwTIFSvc">
+      <soap:address location="http://np1appn143v.corp.halliburton.com:8729/Design_Time_Addresses/EngrDrwTIFService/Service1/" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

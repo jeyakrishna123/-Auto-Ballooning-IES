@@ -1,0 +1,126 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Web;
+using Microsoft.AspNetCore.Hosting;
+
+namespace BubbleDrawing.Common
+{
+    public class ErrorLog
+    {
+        private static string ErrorlineNo=string.Empty, Errormsg=string.Empty, extype=string.Empty, ErrorLocation=string.Empty;
+        string Path = string.Empty;
+        Settings objSettings = new Settings();
+        public  void WriteErrorToText(Exception ex)
+        {
+            if (!Directory.Exists(AppContext.BaseDirectory + "\\ErrorLog"))
+            {
+                Directory.CreateDirectory(AppContext.BaseDirectory + "\\ErrorLog");
+            }
+            Path = AppContext.BaseDirectory + "\\ErrorLog\\";
+            var line = Environment.NewLine + Environment.NewLine;
+            
+            //ErrorlineNo = ex.StackTrace.Substring(ex.StackTrace.Length - 7, 7);
+            var st = new StackTrace(ex, true);
+            // Get the top stack frame
+            var frame = st.GetFrame(0);
+            // Get the line number from the stack frame
+            var lneerror  = frame.GetFileLineNumber();
+            if (string.IsNullOrEmpty(ex.StackTrace.Substring(ex.StackTrace.LastIndexOf(' '))) != true)
+            {
+                Int32 value;
+                bool success = Int32.TryParse(ex.StackTrace.Substring(ex.StackTrace.LastIndexOf(' ')), out value);
+                if (success)
+                {
+                    ErrorlineNo = Convert.ToInt32(ex.StackTrace.Substring(ex.StackTrace.LastIndexOf(' '))).ToString();
+                }
+                else
+                    ErrorlineNo = "";
+            }
+            else
+                ErrorlineNo = "";
+            Errormsg = ex.GetType().Name.ToString();
+            extype = ex.GetType().ToString();
+            //exurl = HttpContext.Current.Request.Url.ToString();
+            ErrorLocation = ex.Message.ToString();
+
+            try
+            {
+
+                if (!Directory.Exists(Path))
+                {
+                    Directory.CreateDirectory(Path);
+                }
+                Path = Path + DateTime.Today.ToString("dd-MM-yy") + ".txt";   //Text File Name
+                if (!File.Exists(Path))
+                {
+                    File.Create(Path).Dispose();
+                }
+                using (StreamWriter sw = File.AppendText(Path))
+                {
+                    string error = "Log Written Date:" + " " + DateTime.Now.ToString() + line + "Error Line No :" + " " + ErrorlineNo + line + "Error Message:" + " " + Errormsg + line + "Exception Type:" + " " + extype + line + "Error Location :" + " " + ErrorLocation + line ;
+                    sw.WriteLine("-----------Exception Details on " + " " + DateTime.Now.ToString() + "-----------------");
+                    sw.WriteLine("-------------------------------------------------------------------------------------");
+                    sw.WriteLine(line);
+                    sw.WriteLine(error);
+                    sw.WriteLine("--------------------------------*End*------------------------------------------");
+                    sw.WriteLine(line);
+                    sw.Flush();
+                    sw.Close();
+                }
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception();
+                
+            }
+        }
+        public void WriteErrorLog(string ex)
+        {
+            if (!Directory.Exists(AppContext.BaseDirectory + "\\ErrorLog"))
+            {
+                Directory.CreateDirectory(AppContext.BaseDirectory + "\\ErrorLog");
+            }
+            Path = AppContext.BaseDirectory + "\\ErrorLog\\";
+            var line = Environment.NewLine + Environment.NewLine;
+            //exurl = HttpContext.Current.Request.Url.ToString();
+            ErrorLocation = ex.ToString();
+
+            try
+            {
+
+                if (!Directory.Exists(Path))
+                {
+                    Directory.CreateDirectory(Path);
+                }
+                Path = Path + "Loginfo" +DateTime.Today.ToString("dd-MM-yy") + ".txt";   //Text File Name
+                if (!File.Exists(Path))
+                {
+                    File.Create(Path).Dispose();
+                }
+                using (StreamWriter sw = File.AppendText(Path))
+                {
+                    string error = "Log Written Date:" + " " + DateTime.Now.ToString() + line + "Error Location :" + " " + ErrorLocation + line;
+                    sw.WriteLine("-----------Exception Details on " + " " + DateTime.Now.ToString() + "-----------------");
+                    sw.WriteLine("-------------------------------------------------------------------------------------");
+                    sw.WriteLine(line);
+                    sw.WriteLine(error);
+                    sw.WriteLine("--------------------------------*End*------------------------------------------");
+                    sw.WriteLine(line);
+                    sw.Flush();
+                    sw.Close();
+                }
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception();
+
+            }
+        }
+    }
+}

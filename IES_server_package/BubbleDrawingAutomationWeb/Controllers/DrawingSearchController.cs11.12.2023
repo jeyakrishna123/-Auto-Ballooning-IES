@@ -1,0 +1,3789 @@
+﻿using BubbleDrawing.BusinessLogic;
+using BubbleDrawing.Cryptography;
+using BubbleDrawing.ServiceReference1;
+using BubbleDrawingAutomationWeb.Models;
+using BubbleDrawingAutomationWeb.Models.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using OpenCvSharp;
+using System.Data;
+using System.Drawing.Imaging;
+using Tesseract;
+using BubbleCommon = BubbleDrawing.Common;
+using System.Text.Json;
+using System.Collections;
+using OpenCvSharp.XImgProc;
+using ImageMagick;
+using System.Drawing;
+using System.IO;
+using static System.Net.Mime.MediaTypeNames;
+using BubbleDrawing;
+using BubbleDrawing.BusinessEntity;
+using System.Xml.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using static Azure.Core.HttpHeader;
+using System.Linq.Expressions;
+using Microsoft.Build.BuildEngine;
+using System.IO;
+using System.Threading.Tasks;
+using System.Drawing.Text;
+using System.Runtime.InteropServices;
+using Emgu.CV.CvEnum;
+using Emgu.CV.OCR;
+using Emgu.CV.Util;
+using Emgu.CV;
+using Emgu.CV.XImgproc;
+using Emgu.CV.Ocl;
+using Emgu.CV.Structure;
+using Emgu.CV.Text;
+
+using TesseractNET;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using ZedGraph;
+using Microsoft.AspNetCore.Http;
+using Image = System.Drawing.Image;
+using Microsoft.Extensions.FileSystemGlobbing.Internal;
+
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using OpenCvSharp.Text;
+using System.Net;
+using System;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Reflection.PortableExecutable;
+using Microsoft.Extensions.Logging;
+using HtmlAgilityPack;
+using System.Security.Policy;
+using static OpenCvSharp.XImgProc.CvXImgProc;
+using System.Diagnostics;
+using Azure;
+using System.Diagnostics.Metrics;
+
+using System.Net.Http.Headers;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Microsoft.AspNetCore.SignalR.Protocol;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using TesseractSharp.Hocr;
+
+
+namespace BubbleDrawingAutomationWeb.Controllers
+{
+
+    internal static class OcrEngine
+    {
+        private static TesseractEngine _ocr;
+        public static TesseractEngine Instance
+        {
+            get
+            {
+                if (_ocr == null)
+                {
+                    _ocr = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "IMSsym1", EngineMode.Default);
+                }
+                return _ocr;
+
+            }
+        }
+    }
+
+    public class KeyValuesClass
+    {
+        private string a_key;
+        private string a_value;
+
+        public KeyValuesClass(string a_key, string a_value)
+        {
+            this.a_key = a_key;
+            this.a_value = a_value;
+        }
+
+        public string Key
+        {
+            get { return a_key; }
+            set { a_key = value; }
+        }
+
+        public string Value
+        {
+            get { return a_value; }
+            set { a_value = value; }
+        }
+
+    }
+    public class SearchForm
+    {
+
+        public string drawingNo { get; set; }
+        public string revNo { get; set; }
+        public string baseUrl { get; set; }
+        public string sessionUserId { get; set; }
+
+
+    }
+    public class AutoBalloon
+    {
+
+        public string CdrawingNo { get; set; }
+        public double aspectRatio { get; set; }
+        public double bgImgW { get; set; }
+        public double bgImgH { get; set; }
+        public double bgImgX { get; set; }
+        public double bgImgY { get; set; }
+
+        public string selectedRegion { get; set; }
+        public List<OCRResults> drawingRegions { get; set; }
+        public List<OCRResults> balloonRegions { get; set; }
+        public List<OCRResults> originalRegions { get; set; }
+
+        public List<OCRResults> annotation { get; set; }
+
+        public string rotate { get; set; }
+
+        public int bgImgRotation { get; set; }
+        public string drawingDetails { get; set; }
+
+        public int ItemView { get; set; }
+        public string CrevNo { get; set; }
+        public int pageNo { get; set; }
+        public int totalPage { get; set; }
+
+    }
+
+    public class BalloonedDetails
+    {
+        public long x { get; set; }
+        public long y { get; set; }
+        public long width { get; set; }
+        public long height { get; set; }
+        public string id { get; set; }
+        public string selectedRegion { get; set; }
+    }
+    public class ResetBalloon
+    {
+        public string CdrawingNo { get; set; }
+        public string CrevNo { get; set; }
+        public int pageNo { get; set; }
+        public int totalPage { get; set; }
+        public List<OCRResults> originalRegions { get; set; }
+    }
+
+    public class RotateBalloon
+    {
+        public string drawingNo { get; set; }
+        public string revNo { get; set; }
+        public string pageNo { get; set; }
+        public string totalPage { get; set; }
+        public string drawingDetails { get; set; }
+        public int ItemView { get; set; }
+        public int rotation { get; set; }
+        public string sessionUserId { get; set; }
+
+    }
+
+
+    public class OCRResults
+    {
+
+        public Int64 BaloonDrwID { get; set; }
+        public string BaloonDrwFileID { get; set; }
+        public string ProductionOrderNumber { get; set; }
+        public string Part_Revision { get; set; }
+        public int Page_No { get; set; }
+        public string DrawingNumber { get; set; }
+        public string Revision { get; set; }
+
+        public string Balloon { get; set; }
+        public string Spec { get; set; }
+        public string Nominal { get; set; }
+        public string Minimum { get; set; }
+        public string Maximum { get; set; }
+        public string MeasuredBy { get; set; }
+        [MaybeNull]
+        public DateTime MeasuredOn { get; set; }
+        public int Circle_X_Axis { get; set; }
+        public int Circle_Y_Axis { get; set; }
+        public int Circle_Width { get; set; }
+        public int Circle_Height { get; set; }
+        [MaybeNull]
+        public int Balloon_Thickness { get; set; }
+        [MaybeNull]
+        public int Balloon_Text_FontSize { get; set; }
+        [MaybeNull]
+        public decimal ZoomFactor { get; set; }
+        public int Crop_X_Axis { get; set; }
+        public int Crop_Y_Axis { get; set; }
+        public int Crop_Width { get; set; }
+        public int Crop_Height { get; set; }
+        public string Type { get; set; }
+        public string SubType { get; set; }
+        public string Unit { get; set; }
+        public int Quantity { get; set; }
+        public string ToleranceType { get; set; }
+        public string PlusTolerance { get; set; }
+        public string MinusTolerance { get; set; }
+        public string MaxTolerance { get; set; }
+        public string MinTolerance { get; set; }
+        public byte[] CropImage { get; set; }
+        public string CreatedBy { get; set; }
+        [MaybeNull]
+        public DateTime CreatedDate { get; set; }
+        public string ModifiedBy { get; set; }
+        [MaybeNull]
+        public DateTime ModifiedDate { get; set; }
+        [MaybeNull]
+        public bool? IsCritical { get; set; }
+        public string id { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+        public int width { get; set; }
+        public int height { get; set; }
+        public string selectedRegion { get; set; }
+        public bool isballooned { get; set; }
+
+    }
+
+    public class ImageList
+    {
+        [JsonProperty("doC_NBR")]
+        public string doC_NBR { get; set; }
+
+        [JsonProperty("doC_REV_LVL")]
+        public string doC_REV_LVL { get; set; }
+
+        [JsonProperty("srvC_URL")]
+        public string srvC_URL { get; set; }
+    }
+
+    public class ServiceUrlList
+    {
+        [JsonProperty("errorMessage")]
+        public string errorMessage { get; set; }
+
+        [JsonProperty("errorCode")]
+        public int errorCode { get; set; }
+
+        [JsonProperty("dataList")]
+        public List<ImageList> dataList { get; set; }
+
+    }
+    public class DrawCircle
+    {
+        public Rectangle Bounds { get; set; }
+        public string BallonNumber { get; set; }
+        public string Balloon_Spec { get; set; }
+    }
+    public class Spec
+    {
+        public string spec { get; set; }
+    }
+
+
+
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DrawingSearchController : ControllerBase
+    {
+        private readonly DimTestContext _dbcontext;
+        private readonly AppSettings _appSettings;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly JsonSerializerOptions _options;
+        private readonly IHttpContextAccessor _httpcontext;
+        private List<DrawCircle> drawcircles = new List<DrawCircle>();
+        DataSet dsconfig = new DataSet();
+        BubbleCommon.Settings objSettings = new BubbleCommon.Settings();
+        BubbleCommon.ErrorLog objerr = new BubbleCommon.ErrorLog();
+        string envcpath = Environment.CurrentDirectory;
+        System.Data.DataTable dtFiles_Production = new DataTable("Production_Files");
+        System.Data.DataTable dtFiles_Header = new DataTable("Drawing_Header");
+        private List<MyCircle> myCircles = new List<MyCircle>();
+        protected IList<System.Drawing.Image> imageList_Crop;
+        List<Circle_AutoBalloon> lstCircle = new List<Circle_AutoBalloon>();
+        List<Circle_AutoBalloon_Single> lstCircle_Single = new List<Circle_AutoBalloon_Single>();
+        int drawing_page_no = 0;
+        int drawing_total_page_no = 0;
+        string drawing_no = string.Empty;
+        string drawing_revision_no = string.Empty;
+        bool iscontainsiphen = false;
+        List<OCRResults> oCRResults = new List<OCRResults>();
+        List<OCRResults> oCRResults_Single = new List<OCRResults>();
+        List<OCRResults> _oCRResults = new List<OCRResults>();
+        string temp = string.Empty;
+        string tempsel = string.Empty;
+        string createdby = "Admin";
+        FontFamily ff;
+        Font font;
+        string username = "Admin";
+        //private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont, IntPtr pdv, [In] ref uint pcFonts);
+        private void LoadConfigDetails()
+        {
+            try
+            {
+                BLL_Admin objBLL_Admin = new BLL_Admin();
+                dsconfig = objBLL_Admin.Fetch_ConfigutationDetails();
+                string IsCrypto = this._appSettings.IsCrypto;
+                string MPMConnStr = this._appSettings.MPMConnStr;
+                if (dsconfig.Tables[0].Rows.Count > 0)
+                {
+                    DataTable dtMPM = dsconfig.Tables[0].AsEnumerable()
+                             .Where(r => r.Field<string>("Environment") == "MPM")
+                             .CopyToDataTable();
+                    if (dtMPM.Rows.Count > 0)
+                    {
+                        objSettings.MPMEnvironment = Convert.ToString(dtMPM.Rows[0]["Environment"]);
+                        objSettings.MPMServer = Convert.ToString(dtMPM.Rows[0]["Datasource"]);
+                        objSettings.MPMDatabase = Convert.ToString(dtMPM.Rows[0]["DBName"]);
+                        if (Convert.ToString(dtMPM.Rows[0]["Authendication"]) == "SQL Server")
+                        {
+                            objSettings.MPMAuthendication = Convert.ToString(dtMPM.Rows[0]["Authendication"]);
+                            objSettings.MPMUserID = Convert.ToString(dtMPM.Rows[0]["UserID"]);
+
+                            if (string.IsNullOrEmpty(IsCrypto) != true)
+                            {
+                                if (IsCrypto.ToLower() == "yes")
+                                {
+                                    objSettings.MPMPassword = Decrypt(Convert.ToString(dtMPM.Rows[0]["Password"]));
+                                }
+                                else
+                                {
+                                    objSettings.MPMPassword = (Convert.ToString(dtMPM.Rows[0]["Password"]));
+                                }
+                            }
+                            else
+                            {
+                                objSettings.MPMPassword = (Convert.ToString(dtMPM.Rows[0]["Password"]));
+                            }
+
+                        }
+                        else
+                        {
+                            objSettings.MPMAuthendication = Convert.ToString(dtMPM.Rows[0]["Authendication"]);
+                            objSettings.MPMUserID = string.Empty;
+                            objSettings.MPMPassword = string.Empty;
+                        }
+
+                    }
+                    DataTable dtQDMS = dsconfig.Tables[0].AsEnumerable()
+                             .Where(r => r.Field<string>("Environment") == "QDMS")
+                             .CopyToDataTable();
+                    if (dtQDMS.Rows.Count > 0)
+                    {
+                        objSettings.QDMSEnvironment = Convert.ToString(dtQDMS.Rows[0]["Environment"]);
+                        objSettings.QDMSServer = Convert.ToString(dtQDMS.Rows[0]["Datasource"]);
+                        objSettings.QDMSDatabase = Convert.ToString(dtQDMS.Rows[0]["DBName"]);
+                        if (Convert.ToString(dtQDMS.Rows[0]["Authendication"]) == "SQL Server")
+                        {
+                            objSettings.QDMSAuthendication = Convert.ToString(dtQDMS.Rows[0]["Authendication"]);
+                            objSettings.QDMSUserID = Convert.ToString(dtQDMS.Rows[0]["UserID"]);
+                            if (string.IsNullOrEmpty(IsCrypto) != true)
+                            {
+                                if (IsCrypto.ToLower() == "yes")
+                                {
+                                    objSettings.QDMSPassword = Decrypt(Convert.ToString(dtQDMS.Rows[0]["Password"]));
+                                }
+                                else
+                                {
+                                    objSettings.QDMSPassword = (Convert.ToString(dtQDMS.Rows[0]["Password"]));
+                                }
+                            }
+                            else
+                            {
+                                objSettings.QDMSPassword = (Convert.ToString(dtQDMS.Rows[0]["Password"]));
+                            }
+                        }
+                        else
+                        {
+                            objSettings.QDMSAuthendication = Convert.ToString(dtQDMS.Rows[0]["Authendication"]);
+                            objSettings.QDMSUserID = string.Empty;
+                            objSettings.QDMSPassword = string.Empty;
+                        }
+                    }
+
+                    DataTable dtCWI = dsconfig.Tables[0].AsEnumerable()
+                             .Where(r => r.Field<string>("Environment") == "CWI")
+                             .CopyToDataTable();
+                    if (dtCWI.Rows.Count > 0)
+                    {
+                        objSettings.CWIEnvironment = Convert.ToString(dtCWI.Rows[0]["Environment"]);
+                        objSettings.CWIServer = Convert.ToString(dtCWI.Rows[0]["Datasource"]);
+                        objSettings.Database = Convert.ToString(dtCWI.Rows[0]["DBName"]);
+                        if (Convert.ToString(dtCWI.Rows[0]["Authendication"]) == "SQL Server")
+                        {
+                            objSettings.CWIAuthendication = Convert.ToString(dtCWI.Rows[0]["Authendication"]);
+                            objSettings.CWIUserID = Convert.ToString(dtCWI.Rows[0]["UserID"]);
+                            if (string.IsNullOrEmpty(IsCrypto) != true)
+                            {
+                                if (IsCrypto.ToLower() == "yes")
+                                {
+                                    objSettings.CWIPassword = Decrypt(Convert.ToString(dtCWI.Rows[0]["Password"]));
+                                }
+                                else
+                                {
+                                    objSettings.CWIPassword = (Convert.ToString(dtCWI.Rows[0]["Password"]));
+                                }
+                            }
+                            else
+                            {
+                                objSettings.CWIPassword = (Convert.ToString(dtCWI.Rows[0]["Password"]));
+                            }
+                        }
+                        else
+                        {
+                            objSettings.CWIAuthendication = Convert.ToString(dtCWI.Rows[0]["Authendication"]);
+                            objSettings.CWIUserID = string.Empty;
+                            objSettings.CWIPassword = string.Empty;
+                        }
+                    }
+
+                    if (dsconfig.Tables[1].Rows.Count > 0)
+                    {
+                        DataView view = new DataView(dsconfig.Tables[1]);
+                        DataTable dt = view.ToTable(false, "Key", "Value");
+                        List<KeyValuePair<String, string>> test = new List<KeyValuePair<string, string>>();
+                        foreach (DataRow dr in dt.Rows)
+                        {
+                            test.Add(new KeyValuePair<string, string>(dr["Key"].ToString(), Convert.ToString(dr["Value"])));
+                        }
+                        foreach (var element in test)
+                        {
+
+                            if (element.Key == "DwngByProductionOrder")
+                            {
+                                objSettings.DwngByProductionOrder = element.Value;
+                            }
+                            else if (element.Key == "DwngByConfirmationNo")
+                            {
+                                objSettings.DwngByConfirmationNo = element.Value;
+                            }
+                            else if (element.Key == "Drawing_Folder")
+                            {
+                                objSettings.DrawingFolder = element.Value;
+                            }
+                            else if (element.Key == "Baloon_Drawing")
+                            {
+                                objSettings.BalloonedFolder = element.Value;
+                            }
+                            else if (element.Key == "ErrorLog_Folder")
+                            {
+                                objSettings.ErrorLogFolder = element.Value;
+                            }
+                            else if (element.Key == "InspectionReportPDF_Folder")
+                            {
+                                objSettings.InspectionReportPDF_Folder = element.Value;
+                            }
+                            else if (element.Key == "InspectionImagePDF_Folder")
+                            {
+                                objSettings.InspectionImagePDF_Folder = element.Value;
+                            }
+                            else if (element.Key == "InspectionExcelReport_Folder")
+                            {
+                                objSettings.InspectionExcelReport_Folder = element.Value;
+                            }
+
+                            else if (element.Key == "BalloonWidth")
+                            {
+                                objSettings.BalloonWidth = Convert.ToInt32(element.Value);
+                            }
+                            else if (element.Key == "BalloonHeight")
+                            {
+                                objSettings.BalloonHeight = Convert.ToInt32(element.Value);
+                            }
+                            else if (element.Key == "BalloonColor")
+                            {
+                                string[] splitBalloonColor = element.Value.Split('-');
+                                objSettings.BalloonColor = element.Value;
+                            }
+                            else if (element.Key == "BalloonTextColor")
+                            {
+                                string[] splitBalloonTextColor = element.Value.Split('-');
+                                objSettings.BalloonTextColor = element.Value;
+                            }
+                            else if (element.Key == "BalloonFontSize")
+                            {
+                                objSettings.BalloonFontSize = Convert.ToInt32(element.Value);
+                            }
+                            else if (element.Key == "BallonNumberFontSize")
+                            {
+                                objSettings.BallonNumberFontSize = Convert.ToInt32(element.Value);
+                            }
+                            else if (element.Key == "MinMaxOneDigit")
+                            {
+                                objSettings.MinMaxOneDigit = Convert.ToDecimal(element.Value);
+                            }
+                            else if (element.Key == "MinMaxTwoDigit")
+                            {
+                                objSettings.MinMaxTwoDigit = Convert.ToDecimal(element.Value);
+                            }
+                            else if (element.Key == "MinMaxThreeDigit")
+                            {
+                                objSettings.MinMaxThreeDigit = Convert.ToDecimal(element.Value);
+                            }
+                            else if (element.Key == "MinMaxFourDigit")
+                            {
+                                objSettings.MinMaxFourDigit = Convert.ToDecimal(element.Value);
+                            }
+                            else if (element.Key == "MinMaxAngles")
+                            {
+                                objSettings.MinMaxAngles = Convert.ToString(element.Value);
+                            }
+                            else if (element.Key == "DimensionUpdateBalloonColor")
+                            {
+                                string[] splitDimensionUpdateBalloonTextColor = element.Value.Split('-');
+                                objSettings.DimensionUpdateBalloonColor = element.Value;
+                            }
+                            else if (element.Key == "LoginSessionTimeOut")
+                            {
+                                objSettings.LoginSessionTimeout = element.Value;
+                            }
+                            else if (element.Key == "LastWorkCenter")
+                            {
+                                objSettings.LastWorkCenter = element.Value;
+                            }
+
+                        }
+                    }
+
+
+
+
+
+
+
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                objerr.WriteErrorToText(ex);
+
+            }
+
+        }
+
+        #region #Cryptography
+        //-----------------------------------------------------------------
+        ///   Method Name:    Encrypt
+        ///   Description:    TO ENCRYPT THE GIVEN STRING 
+        ///   Author:        PRAKASH.K                   Date: 28-01-2020
+        ///   Notes:          <Notes>
+        ///   Revision History:
+        ///   Name:           Date:        Description:
+
+        ///-----------------------------------------------------------------
+        private string Encrypt(string strString)
+        {
+            string str = string.Empty;
+            try
+            {
+                if (string.IsNullOrEmpty(strString) != true)
+                {
+                    string text = strString;
+                    CCryptography encryptor = new CCryptFactory().GetEncryptor();
+
+                    string sToCrypt = text;
+                    string local = str;
+                    encryptor.Crypt(sToCrypt, out local);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+
+            }
+            return str;
+        }
+        //-----------------------------------------------------------------
+        ///   Method Name:    Decrypt
+        ///   Description:    TO DECRYPT THE GIVEN STRING 
+        ///   Author:        PRAKASH.K                   Date: 28-01-2020
+        ///   Notes:          <Notes>
+        ///   Revision History:
+        ///   Name:           Date:        Description:
+
+        ///-----------------------------------------------------------------
+        private string Decrypt(string strEncString)
+        {
+            string str = string.Empty;
+            try
+            {
+                if (string.IsNullOrEmpty(strEncString) != true)
+                {
+                    string text = strEncString;
+                    CCryptography decryptor = new CCryptFactory().GetDecryptor();
+
+                    string sToCrypt = text;
+                    string local = str;
+                    decryptor.Crypt(sToCrypt, out local);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+            return str;
+        }
+        #endregion
+
+        #region #Page_Revision_Details
+        private void Page_Revision_Details(string FileID)
+        {
+            iscontainsiphen = false;
+            try
+            {
+                if (FileID.Contains("of") && FileID.Contains("-"))
+                {
+                    drawing_total_page_no = Convert.ToInt16(FileID.Substring(FileID.IndexOf("of") + 2).Replace(".tiff", "").Replace(".TIFF", "").Replace(".tif", "").Replace(".TIF", "").Replace(".PNG", "").Replace(".Png", "").Replace(".png", ""));
+                    string stringBeforeChar = FileID.Substring(0, FileID.IndexOf("of"));
+                    stringBeforeChar = stringBeforeChar.Substring(stringBeforeChar.Length - 5).Replace(".", "");
+                    if (stringBeforeChar.Contains("-"))
+                    {
+                        iscontainsiphen = true;
+                    }
+                    else
+                    {
+                        iscontainsiphen = false;
+                    }
+                    stringBeforeChar = stringBeforeChar.Substring(0, 2);
+                    drawing_page_no = Convert.ToInt16(stringBeforeChar);
+                    string[] rev = FileID.Split('.');
+                    drawing_no = rev[0];
+                    drawing_revision_no = rev[1];
+                }
+                else if (FileID.Contains("of"))
+                {
+                    drawing_total_page_no = Convert.ToInt16(FileID.Substring(FileID.IndexOf("of") + 2).Replace(".tiff", "").Replace(".TIFF", "").Replace(".tif", "").Replace(".TIF", "").Replace(".PNG", "").Replace(".Png", "").Replace(".png", ""));
+                    string stringBeforeChar = FileID.Substring(0, FileID.IndexOf("of"));
+                    stringBeforeChar = stringBeforeChar.Substring(stringBeforeChar.Length - 4);
+                    stringBeforeChar = stringBeforeChar.Substring(0, 2);
+                    drawing_page_no = Convert.ToInt16(stringBeforeChar);
+                    string[] rev = FileID.Split('.');
+                    drawing_no = rev[0];
+                    drawing_revision_no = rev[1];
+
+
+                }
+                else if (FileID.Contains("-"))
+                {
+                    drawing_total_page_no = Convert.ToInt16(FileID.Substring(FileID.LastIndexOf("-") + 2).Replace(".tiff", "").Replace(".TIFF", "").Replace(".tif", "").Replace(".TIF", "").Replace(".PNG", "").Replace(".Png", "").Replace(".png", ""));
+                    string stringBeforeChar = FileID.Substring(0, FileID.LastIndexOf("-"));
+                    stringBeforeChar = stringBeforeChar.Substring(stringBeforeChar.Length - 2);
+                    drawing_page_no = Convert.ToInt16(stringBeforeChar);
+                    string[] rev = FileID.Split('.');
+                    drawing_no = rev[0];
+                    drawing_revision_no = rev[1];
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception();
+            }
+        }
+
+        #endregion
+
+
+        #region #MyCircle
+
+
+        public class Circle_AutoBalloon_Single
+        {
+            public System.Drawing.RectangleF Bounds { get; set; }
+
+            public void Move(System.Drawing.Point currentMousePoint)
+            {
+                Bounds = new System.Drawing.RectangleF(currentMousePoint, Bounds.Size);
+            }
+
+            public double ZoomFactor { get; set; }
+
+            public int BallonNumber { get; set; }
+            public int ImageWidth { get; set; }
+        }
+        public class Circle_AutoBalloon
+        {
+            public System.Drawing.RectangleF Bounds { get; set; }
+        }
+        public class AutoBalloon_OCR
+        {
+            //public System.Drawing.RectangleF Bounds { get; set; }
+            public int X_Axis { get; set; }
+            public int Y_Axis { get; set; }
+            public int Width { get; set; }
+            public int Height { get; set; }
+            public string Ocr_Text { get; set; }
+            public int Qty { get; set; }
+            public int No { get; set; }
+        }
+        public class MyCircle
+        {
+            public System.Drawing.Point Point { get; set; }
+            public double Radius { get; set; }
+            public int Balloon_No { get; set; }
+            public string OCR_Text { get; set; }
+            public string OCR_Image_FileName { get; set; }
+            public int Quantity { get; set; }
+            public MyCircle(System.Drawing.Point point, Double radius)
+            {
+                Point = point;
+                Radius = radius;
+            }
+        }
+        #endregion
+
+        private string EvaluateText(string ocrText)
+        {
+            string OCRText = string.Empty;
+            if (ocrText != null)
+            {
+                var text = ocrText.Trim();
+                //Commented By Prakash
+                //Regex rgx = new Regex("[^a-zA-Z0-9@. ]");
+                //text = rgx.Replace(text, " ");
+                text = text.Trim();
+
+                if (Heuristic(text))
+                {
+                    if (!String.IsNullOrEmpty(text))
+                    {
+                        OCRText = text;
+                        // sb.AppendLine(text);
+                    }
+                }
+            }
+            return OCRText;
+        }
+        private bool Heuristic(string text)
+        {
+            string eval = "aeiouyAEIOUY0123456789"; //vowels or letters
+            string filtered = new String(text.Where(c => eval.Contains(c)).ToArray());
+            if (filtered.Length == 0)
+                return false;
+
+            //Heuristic - remove common OCR of IIII, HHHH, LLLL, OOOO etc. for bars, circles
+            eval = ".IiLlHE0Oo";
+            filtered = new String(text.Where(c => !eval.Contains(c)).ToArray());
+            return filtered.Length > 1;
+        }
+        public List<OpenCvSharp.Rect> OrderRegions(IList<OpenCvSharp.Rect> regions)
+        {
+            var sort = regions.ToList();
+            sort.Sort((l, r) =>
+            {
+                if (Math.Abs(l.Y - r.Y) < 15)
+                    return l.X.CompareTo(r.X);
+                return l.Y.CompareTo(r.Y);
+            });
+            return sort;
+        }
+        public MemoryStream imageToByteArray(System.Drawing.Image imageIn)
+        {
+
+            MemoryStream ms = new MemoryStream();
+
+            try
+            {
+                imageIn.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return ms;
+        }
+
+        private void RemoveOpaqueColormapFrom1BPP(string dtFiles)
+        {
+            // Load the 1 bpp PNG image
+            using (MagickImage image = new MagickImage(dtFiles))
+            {
+                // Convert to grayscale
+                image.ColorType = ColorType.Grayscale;
+
+                // Ensure that it's 1 bpp
+                image.Depth = 1;
+
+                // Save the modified image
+                MemoryStream outputStream = new MemoryStream();
+
+                image.Write(outputStream, MagickFormat.Png);
+                byte[] outputBytes = outputStream.ToArray();
+                FileInfo fi = new FileInfo(dtFiles);
+                string Fname = fi.Name.Replace(fi.Extension, "");
+                // You can return the modified image bytes as a response
+                temp = SaveBytesToFile(outputBytes, Fname);
+                outputStream.Dispose();
+
+
+            }
+        }
+        public static string SaveBytesToFile(byte[] bytes, string Fname)
+        {
+            string regionImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + $"{Fname}.png");
+            try
+            {
+                System.IO.File.WriteAllBytes(regionImageFile, bytes);
+                return regionImageFile;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that may occur during file writing
+                Console.WriteLine($"Error saving file: {ex.Message}");
+                return null;
+            }
+        }
+
+        private void RemoveOpaqueColormapFrom1BPPsel(string dtFiles)
+        {
+            // Load the 1 bpp PNG image
+            using (MagickImage image = new MagickImage(dtFiles))
+            {
+                // Convert to grayscale
+                image.ColorType = ColorType.Grayscale;
+
+                // Ensure that it's 1 bpp
+                image.Depth = 1;
+
+                // Save the modified image
+                MemoryStream outputStream = new MemoryStream();
+
+                image.Write(outputStream, MagickFormat.Png);
+                byte[] outputBytes = outputStream.ToArray();
+                FileInfo fi = new FileInfo(dtFiles);
+                string Fname = fi.Name.Replace(fi.Extension, "");
+                // You can return the modified image bytes as a response
+                tempsel = SaveBytesToFilesel(outputBytes, Fname);
+                outputStream.Dispose();
+
+
+            }
+        }
+        public static string SaveBytesToFilesel(byte[] bytes, string Fname)
+        {
+            string regionImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + $"{Fname}.png");
+            try
+            {
+                System.IO.File.WriteAllBytes(regionImageFile, bytes);
+                return regionImageFile;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that may occur during file writing
+                Console.WriteLine($"Error saving file: {ex.Message}");
+                return null;
+            }
+        }
+        private void Clear_PropDet()
+        {
+            try
+            {
+                imageList_Crop = new System.Collections.Generic.List<System.Drawing.Image>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+        }
+        public List<T> ConvertToList<T>(DataTable dt)
+        {
+            var columnNames = dt.Columns.Cast<DataColumn>()
+                    .Select(c => c.ColumnName)
+                    .ToList();
+            var properties = typeof(T).GetProperties();
+            return dt.AsEnumerable().Select(row =>
+            {
+                var objT = Activator.CreateInstance<T>();
+                foreach (var pro in properties)
+                {
+                    if (columnNames.Contains(pro.Name))
+                    {
+                        PropertyInfo pI = objT.GetType().GetProperty(pro.Name);
+                        pro.SetValue(objT, row[pro.Name] == DBNull.Value ? null : Convert.ChangeType(row[pro.Name], pI.PropertyType));
+                    }
+                }
+                return objT;
+            }).ToList();
+        }
+        public static DataTable ToDataTable<T>(List<T> items)
+        {
+            DataTable dataTable = new DataTable(typeof(T).Name);
+
+            //Get all the properties
+            PropertyInfo[] Props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo prop in Props)
+            {
+                //Setting column names as Property names
+                dataTable.Columns.Add(prop.Name);
+            }
+            foreach (T item in items)
+            {
+                var values = new object[Props.Length];
+                for (int i = 0; i < Props.Length; i++)
+                {
+                    //inserting property values to datatable rows
+                    values[i] = Props[i].GetValue(item, null);
+                }
+                dataTable.Rows.Add(values);
+            }
+            //put a breakpoint here and check datatable
+            return dataTable;
+        }
+        public DataTable Load_MeasureType()
+        {
+            DataTable dtType = new DataTable();
+            try
+            {
+
+                BLL_BalloonDrawing objBLL_BalloonDrawing = new BLL_BalloonDrawing();
+                dtType = objBLL_BalloonDrawing.Fetch_MeasureType().Tables[0];
+                if (dtType.Rows.Count > 0)
+                {
+                    return dtType;
+                }
+                return dtType;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception();
+            }
+        }
+        public DataTable Load_MeasureSubType()
+        {
+            DataTable dtSubType = new DataTable();
+            try
+            {
+
+                BLL_BalloonDrawing objBLL_BalloonDrawing = new BLL_BalloonDrawing();
+                dtSubType = objBLL_BalloonDrawing.Fetch_MeasureSubType().Tables[0];
+                if (dtSubType.Rows.Count > 0)
+                {
+                    return dtSubType;
+                }
+                return dtSubType;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+
+            }
+        }
+        public DataTable Load_UOM()
+        {
+
+            DataTable dtUOM = new DataTable();
+            try
+            {
+
+                BLL_BalloonDrawing objBLL_BalloonDrawing = new BLL_BalloonDrawing();
+                dtUOM = objBLL_BalloonDrawing.Fetch_UOM().Tables[0];
+                if (dtUOM.Rows.Count > 0)
+                {
+                    return dtUOM;
+                }
+                return dtUOM;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception();
+            }
+        }
+        public static void GetFrames(string imgPath, string savePath)
+        {
+            System.Drawing.Image gif = System.Drawing.Image.FromFile(imgPath);
+            FrameDimension fd = new FrameDimension(gif.FrameDimensionsList[0]);
+            int count = gif.GetFrameCount(fd);//获取帧数(gif图片可能包含多帧，其它格式图片一般仅一帧)
+            for (int i = 0; i < count; i++)
+            {
+                gif.SelectActiveFrame(fd, i);
+                gif.Save(savePath + "\\frame_" + i + ".jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+        }
+        private static string ChangeFonts(string input)
+        {
+            string output = "";
+            try
+            {
+
+                FontStyle fontStyle = FontStyle.Regular;
+                //output.Font = new Font(ff, 8, fontStyle);
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return output;
+        }
+        private void GetPrivateFontCollection()
+        {
+            try
+            {
+                // Create the byte array and get its length
+                string clientPath = envcpath + "\\" + "ClientApp\\src\\assets" + "\\";
+                byte[] fontArray = System.IO.File.ReadAllBytes(clientPath + "MATHS.ttf");
+                //byte[] fontArray = BubbleDrawing.Properties.Resources.IMSN;
+                int dataLength = fontArray.Length;
+
+
+                // ASSIGN MEMORY AND COPY  BYTE[] ON THAT MEMORY ADDRESS
+                IntPtr ptrData = Marshal.AllocCoTaskMem(dataLength);
+                Marshal.Copy(fontArray, 0, ptrData, dataLength);
+
+
+                uint cFonts = 0;
+                //AddFontMemResourceEx(ptrData, (uint)fontArray.Length, IntPtr.Zero, ref cFonts);
+
+                PrivateFontCollection pfc = new PrivateFontCollection();
+                //PASS THE FONT TO THE  PRIVATEFONTCOLLECTION OBJECT
+                pfc.AddMemoryFont(ptrData, dataLength);
+
+                //FREE THE  "UNSAFE" MEMORY
+                Marshal.FreeCoTaskMem(ptrData);
+
+                ff = pfc.Families[0];
+                font = new Font(ff, 8f, FontStyle.Regular);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        private Emgu.CV.OCR.Tesseract _ocr;
+        private string OcrImage(Emgu.CV.OCR.Tesseract ocr, Emgu.CV.Mat image, Emgu.CV.Mat imageColor)
+        {
+            try
+            {
+                Emgu.CV.Structure.Bgr drawCharColor = new Emgu.CV.Structure.Bgr(System.Drawing.Color.Red);
+
+                if (image.NumberOfChannels == 1)
+                    Emgu.CV.CvInvoke.CvtColor(image, imageColor, Emgu.CV.CvEnum.ColorConversion.Gray2Bgr);
+                else
+                    image.CopyTo(imageColor);
+
+
+                ocr.SetImage(imageColor);
+
+                if (ocr.Recognize() != 0)
+                    throw new Exception("Failed to recognizer image");
+
+                Emgu.CV.OCR.Tesseract.Character[] characters = ocr.GetCharacters();
+                if (characters.Length == 0)
+                {
+                    Emgu.CV.Mat imgGrey = new Emgu.CV.Mat();
+                    Emgu.CV.CvInvoke.CvtColor(image, imgGrey, ColorConversion.Bgr2Gray);
+                    Emgu.CV.Mat imgThresholded = new Emgu.CV.Mat();
+                    Emgu.CV.CvInvoke.Threshold(imgGrey, imgThresholded, 65, 255, ThresholdType.Binary);
+
+                    GC.Collect();
+
+                    _ocr.SetImage(imgThresholded);
+                    characters = _ocr.GetCharacters();
+                    imageColor = imgThresholded;
+                    if (characters.Length == 0)
+                    {
+                        Emgu.CV.CvInvoke.Threshold(image, imgThresholded, 190, 255, ThresholdType.Binary);
+
+                        ocr.SetImage(imgThresholded);
+                        characters = ocr.GetCharacters();
+                        imageColor = imgThresholded;
+                    }
+                }
+
+                foreach (Emgu.CV.OCR.Tesseract.Character c in characters)
+                {
+                    CvInvoke.Rectangle(imageColor, c.Region, drawCharColor.MCvScalar);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return ocr.GetUTF8Text();
+        }
+        class WordInfo
+        {
+            public string Text { get; set; }
+            public OpenCvSharp.Rect BoundingBox { get; set; }
+        }
+
+
+        static WordInfo FindNearestPreviousWord(int currentIndex, List<WordInfo> wordInfos)
+        {
+            if (currentIndex > 0)
+            {
+                return wordInfos[currentIndex - 1];
+            }
+            else
+            {
+                return new WordInfo(); // Handle the case when there is no previous word
+            }
+        }
+
+        static WordInfo FindNearestNextWord(int currentIndex, List<WordInfo> wordInfos)
+        {
+            if (currentIndex < wordInfos.Count - 1)
+            {
+                return wordInfos[currentIndex + 1];
+            }
+            else
+            {
+                return new WordInfo(); // Handle the case when there is no next word
+            }
+        }
+
+        private List<WordInfo> WordInfoRegions(List<WordInfo> wordInfos)
+        {
+            var sort = wordInfos.ToList();
+            sort.Sort((l, r) =>
+            {
+                if (Math.Abs(l.BoundingBox.Y - r.BoundingBox.Y) < 15)
+                    return l.BoundingBox.X.CompareTo(r.BoundingBox.X);
+                return l.BoundingBox.Y.CompareTo(r.BoundingBox.Y);
+            });
+            return sort;
+        }
+
+        public DrawingSearchController(DimTestContext dbcontext, IOptions<AppSettings> options, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpcontext)
+        {
+
+            _appSettings = options.Value;
+            _dbcontext = dbcontext;
+            LoadConfigDetails();
+            _httpClientFactory = httpClientFactory;
+            _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            _httpcontext = httpcontext;
+
+
+        }
+        public sessionobj getsession()
+        {
+            var session = HttpContext.Session;
+            sessionobj obj = session.GetObjectFromJson<sessionobj>("sessionobj");
+            return obj;
+        }
+        public sessionobj setsession()
+        {
+            var session = HttpContext.Session;
+            var sessionInfo = new sessionobj();
+            sessionobj sessionobj = session.GetObjectFromJson<sessionobj>("sessionobj");
+            if (sessionobj == null)
+            {
+
+                string sessionName = "Current User";
+                string sessionId = Guid.NewGuid().ToString();
+
+                sessionInfo.sessionUserName = sessionName;
+                sessionInfo.sessionUserId = sessionId;
+                sessionInfo.expire = TimeSpan.FromMinutes(10);
+                session.SetObjectAsJson("sessionobj", sessionInfo);
+            }
+            else
+            {
+                sessionobj.expire = TimeSpan.FromMinutes(10);
+                session.SetObjectAsJson("sessionobj", sessionobj);
+            }
+            sessionobj obj = session.GetObjectFromJson<sessionobj>("sessionobj");
+            return obj;
+        }
+        public DataTable RequestHeader(DataTable dtFiles_Header)
+        {
+            List<string> header = new List<string> { "DrawingNo", "Part_No", "Revision_No", "PRevisionNo", "sessionId" };
+            for (var i = 0; i < header.Count; i++)
+            {
+                dtFiles_Header.Columns.Add(header[i].ToString(), typeof(string));
+                dtFiles_Header.Columns[i].ColumnName = header[i].ToString();
+            }
+
+            return dtFiles_Header;
+        }
+        public DataTable RequestProduct(DataTable dtFiles_Production)
+        {
+            List<string> header = new List<string> { "FileName", "FilePath", "Annotation", "Drawing", "CurrentPage", "TotalPage", "rotation" };
+            for (var i = 0; i < header.Count; i++)
+            {
+                dtFiles_Production.Columns.Add(header[i].ToString(), typeof(string));
+                dtFiles_Production.Columns[i].ColumnName = header[i].ToString();
+            }
+
+            return dtFiles_Production;
+        }
+
+        public string getConnectionStr(DataTable dtMPM)
+        {
+            string connstr = string.Empty;
+            string IsCrypto = this._appSettings.IsCrypto;
+            if (string.IsNullOrEmpty(Convert.ToString(dtMPM.Rows[0]["Authendication"])) != true)
+            {
+                if (Convert.ToString(dtMPM.Rows[0]["Authendication"]) == "SQL Server")
+                {
+                    if (string.IsNullOrEmpty(IsCrypto) != true)
+                    {
+                        if (IsCrypto.ToLower() == "yes")
+                        {
+                            connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + "" + ";Password=" + Decrypt(Convert.ToString(dtMPM.Rows[0]["Password"])) + "";
+
+                        }
+                        else
+                        {
+                            connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + "" + ";Password=" + (Convert.ToString(dtMPM.Rows[0]["Password"])) + "";
+                        }
+                    }
+                    else
+                    {
+                        connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + "" + ";Password=" + (Convert.ToString(dtMPM.Rows[0]["Password"])) + "";
+                    }
+                }
+                else
+                {
+                    connstr = @"Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";Integrated Security=" + "True" + "";
+                }
+            }
+            return connstr;
+        }
+
+        public void RotateImagefile(string ImageFile, int angle)
+        {
+            if (angle != 0)
+            {
+                System.Drawing.Image orimage = System.Drawing.Image.FromFile(ImageFile);
+                RotateFlipType r;
+                switch (angle)
+                {
+                    case 90:
+                        r = RotateFlipType.Rotate90FlipNone;
+                        orimage.RotateFlip(r);
+
+                        break;
+                    case 180:
+                        r = RotateFlipType.Rotate180FlipNone;
+                        orimage.RotateFlip(r);
+
+                        break;
+                    case 270:
+                        r = RotateFlipType.Rotate270FlipNone;
+                        orimage.RotateFlip(r);
+                        break;
+                }
+                orimage.Save(ImageFile);
+                orimage.Dispose();
+            }
+        }
+        public async void SaveExternalImage(string imageUrl, string filename, int curs)
+        {
+            try
+            {
+                var handler = new HttpClientHandler();
+                handler.DefaultProxyCredentials = CredentialCache.DefaultCredentials;
+                using (HttpClient httpClient = new HttpClient(handler))
+                {
+                    httpClient.DefaultRequestHeaders.Referrer = new Uri("https://np1appl077v.corp.halliburton.com");
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("image/png"));
+                    // Send an HTTP GET request and get the response
+                    HttpResponseMessage response = await httpClient.GetAsync(imageUrl);
+                    objerr.WriteErrorLog(" Image StatusCode  " + curs + ":" + response.StatusCode);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Read the image content as a byte array
+                        byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+                        if (imageBytes.Length > 0)
+                        {
+                            // Save the byte array as an image file
+                            System.IO.File.WriteAllBytes(filename, imageBytes);
+                            objerr.WriteErrorLog(" Image File downloaded successfully.");
+                        }
+                    }
+                    else
+                    {
+                        objerr.WriteErrorLog(" Image failed  " + curs + ":" + response.IsSuccessStatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                objerr.WriteErrorLog(" Image destination saved: " + ex.ToString());
+            }
+        }
+        public string rotateproperties(string drawingNo, string revNo, DataTable dtFiles_Production)
+        {
+            var hdr = _dbcontext.TblBaloonDrawingHeaders.Where(w => w.DrawingNumber == drawingNo.ToString() && w.Revision == revNo.ToString()).FirstOrDefault();
+
+            string rotate = string.Empty;
+            if (hdr != null)
+            {
+                rotate = hdr.RotateProperties;
+                if (rotate == null)
+                {
+                    rotate = "[";
+                    for (int rt = 0; rt < dtFiles_Production.Rows.Count; rt++)
+                    {
+                        rotate += "0,";
+                    }
+                    rotate = rotate.Remove(rotate.Length - 1, 1);
+                    rotate += "]";
+                }
+            }
+            else
+            {
+                rotate = "[";
+                for (int rt = 0; rt < dtFiles_Production.Rows.Count; rt++)
+                {
+                    rotate += "0,";
+                }
+                rotate = rotate.Remove(rotate.Length - 1, 1);
+                rotate += "]";
+            }
+            return rotate;
+        }
+
+        [HttpPost]
+        [Route("GetDrawingByNumber")]
+        public async Task<ActionResult<SearchForm>> GetDrawingByNumber(SearchForm searchForm)
+        {
+            try
+            {
+                sessionobj sessionData = getsession();
+                if (sessionData == null)
+                {
+                    sessionData = setsession();
+                }
+                string connstr = string.Empty;
+                dtFiles_Header = RequestHeader(dtFiles_Header);
+                dtFiles_Production = RequestProduct(dtFiles_Production);
+                List<KeyValuesClass> response = new List<KeyValuesClass>();
+
+                if (_dbcontext.TblConfigurations == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    string env = this._appSettings.ENVIRONMENT;
+                    objerr.WriteErrorLog(" enc  " + env);
+                    if (dsconfig.Tables.Count > 0)
+                    {
+                        string clientPath = envcpath + "\\ClientApp\\src\\drawing\\";
+                        string externalApiUrl = this._appSettings.GetDrawingServiceUrlList;
+                        string endPoint = "/" + searchForm.drawingNo.ToString() + "/" + searchForm.revNo.ToString();
+                        string sessionUserId = string.Empty;
+                        if (searchForm.sessionUserId == "")
+                        {
+                            sessionUserId = sessionData.sessionUserId;
+                        }
+                        else
+                        {
+                            sessionUserId = searchForm.sessionUserId;
+                        }
+                        if (env != "development")
+                        {
+                            clientPath = clientPath + "\\" + sessionUserId + "\\";
+                            if (!Directory.Exists(clientPath))
+                            {
+                                Directory.CreateDirectory(clientPath);
+                            }
+                        }
+
+                        if (env != "development")
+                        {
+                            try
+                            {
+
+                                using (HttpClient httpClient = new HttpClient())
+                                {
+                                    HttpResponseMessage res = httpClient.GetAsync(externalApiUrl + endPoint, HttpCompletionOption.ResponseContentRead).Result;
+
+                                    var responseBody = await res.Content.ReadAsStringAsync();
+                                    var json = JsonConvert.DeserializeObject<JToken>(Convert.ToString(responseBody));
+                                    var data = json.Value<JToken>("dataList");
+                                    var errorMessage = json["errorMessage"].Value<string>();
+                                    var errorCode = json["errorCode"].Value<int>();
+
+                                    if (errorMessage == "Successful")
+                                    {
+                                        DataRow dtHrow;
+                                        DataRow dtFrow;
+
+                                        dtHrow = dtFiles_Header.NewRow();
+                                        dtHrow["DrawingNo"] = searchForm.drawingNo.ToString();
+                                        dtHrow["Part_No"] = "";
+                                        dtHrow["Revision_No"] = searchForm.revNo.ToString();
+                                        dtHrow["PRevisionNo"] = "";
+                                        dtHrow["sessionId"] = sessionUserId;
+                                        dtFiles_Header.Rows.Add(dtHrow);
+
+                                        int citem = 1;
+                                        var total_page = data.Count();
+                                        foreach (var item in data)
+                                        {
+                                            var curs = citem++;
+                                            dtFrow = dtFiles_Production.NewRow();
+                                            string Url = Convert.ToString(item.Value<JToken>("srvC_URL"));
+
+                                            string prefix = searchForm.drawingNo.ToString() + "." + searchForm.revNo.ToString() + ".";
+                                            var cur = "";
+                                            if (curs.ToString().Length < 2)
+                                            {
+                                                cur = "0" + curs.ToString();
+                                            }
+                                            else
+                                            {
+                                                cur = curs.ToString();
+                                            }
+                                            var tot = "";
+                                            if (total_page.ToString().Length < 2)
+                                            {
+                                                tot = "0" + total_page.ToString();
+                                            }
+                                            else
+                                            {
+                                                tot = total_page.ToString();
+                                            }
+                                            var fileName = prefix + cur + "-" + tot + ".png";
+                                            var filePath = clientPath + fileName;
+                                            var OrgPath = clientPath + "\\drawing\\";
+                                            if (!Directory.Exists(OrgPath))
+                                            {
+                                                Directory.CreateDirectory(OrgPath);
+                                            }
+                                            dtFrow["FileName"] = fileName;
+                                            dtFrow["FilePath"] = filePath;
+                                            dtFrow["rotation"] = 0;
+                                            dtFrow["Annotation"] = filePath;
+                                            dtFrow["Drawing"] = fileName;
+                                            dtFrow["CurrentPage"] = curs;
+                                            dtFrow["TotalPage"] = total_page;
+                                            objerr.WriteErrorLog(" Image source  " + curs + ":" + Url);
+                                            objerr.WriteErrorLog(" Image Target  " + curs + ":" + filePath);
+                                            // SaveExternalImage(Url, filePath, curs);
+                                            using (WebClient client = new WebClient()) // WebClient class inherits IDisposable
+                                            {
+                                                client.UseDefaultCredentials = true;
+                                                byte[] a = client.DownloadData(Url);
+                                                string s = string.Empty;
+
+                                                System.IO.File.WriteAllBytes(filePath, a);
+                                                System.IO.File.WriteAllBytes(OrgPath + fileName, a);
+                                            }
+                                            dtFiles_Production.Rows.Add(dtFrow);
+                                        }
+
+                                        System.IO.DirectoryInfo deletableImage = new System.IO.DirectoryInfo(clientPath);
+                                        foreach (System.IO.FileInfo f in deletableImage.GetFiles())
+                                        {
+                                            f.Delete();
+                                        }
+                                        string rotate = rotateproperties(searchForm.drawingNo, searchForm.revNo, dtFiles_Production);
+
+                                        for (int k = 0; k < dtFiles_Production.Rows.Count; k++)
+                                        {
+                                            string tifImg = dtFiles_Production.Rows[k]["FilePath"].ToString();
+                                            string desFile = dtFiles_Production.Rows[k]["FileName"].ToString();
+
+                                            var OrgPath = clientPath + "\\drawing\\";
+                                            string Source = OrgPath + "\\" + desFile;
+                                            if (!Directory.Exists(OrgPath))
+                                            {
+                                                Directory.CreateDirectory(OrgPath);
+                                            }
+                                            var matches = Regex.Matches(rotate, @"\d+");
+                                            int[] numbers = matches.Cast<Match>().Select(m => int.Parse(m.Value)).ToArray();
+                                            string ImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + desFile);
+                                            System.IO.File.Copy(Source, ImageFile, true);
+                                            if (numbers.Length > 0)
+                                            {
+                                                try
+                                                {
+                                                    dtFiles_Production.Rows[k]["rotation"] = numbers[k];
+                                                    RotateImagefile(ImageFile, numbers[k]);
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    dtFiles_Production.Rows[k]["rotation"] = 0;
+                                                }
+                                            }
+                                            System.IO.File.Copy(ImageFile, tifImg, true);
+                                            System.IO.File.Delete(ImageFile);
+
+                                        }
+
+                                        IEnumerable<object> results = new List<object>();
+                                        if (dtFiles_Production.Rows.Count > 0)
+                                        {
+                                            results = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.drawingNo.ToString() && w.Revision == searchForm.revNo.ToString()).ToList();
+                                        }
+                                        var returnObject = new List<object>();
+                                        returnObject.Add(dtFiles_Production);
+                                        returnObject.Add(dtFiles_Header);
+                                        returnObject.Add(results);
+                                        var lmtype = Load_MeasureType();
+                                        var lmsubtype = Load_MeasureSubType();
+                                        //var units = Load_UOM();
+                                        returnObject.Add(lmtype);
+                                        returnObject.Add(lmsubtype);
+                                        returnObject.Add(new object[] { "Inches" }); // units 
+                                        returnObject.Add(new object[] { "Linear", "Default" }); // Tolerance         
+
+                                        return StatusCode(StatusCodes.Status200OK, returnObject);
+                                    }
+                                    else
+                                    {
+                                        return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status204NoContent, "Drawing does not exists against your Search.");
+
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                objerr.WriteErrorToText(ex);
+                                return BadRequest("catch:Please Enter Valid Inputs.");
+                            }
+
+                        }
+
+
+                        var dtM = dsconfig.Tables[0].AsEnumerable().Where(r => r.Field<string>("Environment") == "MPM");
+                        DataTable dtMPM = dtM.CopyToDataTable();
+
+                        if (dtMPM.Rows.Count > 0)
+                        {
+                            connstr = getConnectionStr(dtMPM);
+
+                            string squery = "select ProductionOrderNo as [Production_Order_No],Drawing_No as [Drawing_No] ,DRevNo as [Revision_No],PartNo as [Part_No],PRevNo as [BOM_REV] from Tbl_BalloonDrawing WHERE Drawing_No = @Drawing_No   and DRevNo = @DRevNo";
+                            string query = squery.Replace("@Drawing_No", "'" + searchForm.drawingNo.ToString() + "'").Replace("@DRevNo", "'" + searchForm.revNo.ToString() + "'");
+                            BLL_BalloonDrawing objBLL_BalloonDrawing = new BLL_BalloonDrawing();
+                            DataTable dtvalue = objBLL_BalloonDrawing.FetchDimensionDetails_ProductionOrderNo(connstr, query).Tables[0];
+                            if (dtvalue.Rows.Count > 0)
+                            {
+                                var ext = new List<string> { ".png", ".PNG" };
+
+                                List<string> files = new List<string>();
+                                for (int k = 0; k < dtvalue.Rows.Count; k++)
+                                {
+                                    DataRow dtHrow;
+
+                                    dtHrow = dtFiles_Header.NewRow();
+                                    dtHrow["DrawingNo"] = Convert.ToString(dtvalue.Rows[k]["Drawing_No"]);
+                                    dtHrow["Part_No"] = Convert.ToString(dtvalue.Rows[k]["Part_No"]);
+                                    dtHrow["Revision_No"] = Convert.ToString(dtvalue.Rows[k]["Revision_No"]);
+                                    dtHrow["PRevisionNo"] = Convert.ToString(dtvalue.Rows[k]["BOM_REV"]);
+                                    dtHrow["sessionId"] = sessionUserId;
+
+                                    dtFiles_Header.Rows.Add(dtHrow);
+                                    string search = Convert.ToString(dtvalue.Rows[k]["Drawing_No"]);
+                                    var myFiles = Directory.GetFiles(objSettings.DrawingFolder, search.Trim() + ".*", SearchOption.TopDirectoryOnly)
+                                         .Where(s => ext.Contains(System.IO.Path.GetExtension(s)));
+                                    foreach (string s in myFiles)
+                                    {
+                                        files.Add(s);
+                                    }
+                                }
+
+
+                                List<string> filess = new List<string>();
+                                for (int k = 0; k < dtvalue.Rows.Count; k++)
+                                {
+                                    string search = Convert.ToString(dtvalue.Rows[k]["Drawing_No"]);
+                                    var myFiles = Directory.GetFiles(objSettings.DrawingFolder, search.Trim() + ".*", SearchOption.TopDirectoryOnly)
+                                         .Where(s => ext.Contains(System.IO.Path.GetExtension(s)));
+                                    foreach (string s in myFiles)
+                                    {
+                                        filess.Add(s);
+                                    }
+                                }
+
+                                foreach (string s in filess)
+                                {
+                                    DataRow dtrow;
+                                    dtrow = dtFiles_Production.NewRow();
+                                    dtrow["FileName"] = s.Replace(objSettings.DrawingFolder, "").Replace("\\", "");
+                                    dtrow["FilePath"] = s;
+                                    dtFiles_Production.Rows.Add(dtrow);
+                                }
+                                myCircles.Clear();
+                                Clear_PropDet();
+                                if (dtFiles_Production.Rows.Count > 0)
+                                {
+
+                                    string clientLocalPath = "";
+
+                                    System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(clientPath);
+                                    foreach (System.IO.FileInfo file in di.GetFiles())
+                                    {
+                                        file.Delete();
+                                    }
+
+
+                                    string rotate = rotateproperties(searchForm.drawingNo, searchForm.revNo, dtFiles_Production);
+
+                                    for (int k = 0; k < dtFiles_Production.Rows.Count; k++)
+                                    {
+                                        string tifImg = dtFiles_Production.Rows[k]["FilePath"].ToString();
+                                        FileInfo fi = new FileInfo(tifImg);
+                                        string desFile = fi.Name.Replace(fi.Extension, "") + ".png";
+                                        string pngImg = fi.DirectoryName + "\\" + desFile;
+                                        string clientImg = clientPath + desFile;
+                                        string clientLocalPathImg = clientLocalPath + desFile;
+                                        if (String.Equals(fi.Extension.ToLower(), ".tif", StringComparison.OrdinalIgnoreCase) || String.Equals(fi.Extension.ToLower(), ".tiff", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            System.Drawing.Bitmap.FromFile(tifImg).Save(pngImg, System.Drawing.Imaging.ImageFormat.Png);
+                                        }
+
+
+
+                                        var matches = Regex.Matches(rotate, @"\d+");
+                                        int[] numbers = matches.Cast<Match>().Select(m => int.Parse(m.Value)).ToArray();
+                                        string ImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + desFile);
+                                        System.IO.File.Copy(tifImg, ImageFile, true);
+                                        if (numbers.Length > 0)
+                                        {
+                                            try
+                                            {
+                                                dtFiles_Production.Rows[k]["rotation"] = numbers[k];
+                                                RotateImagefile(ImageFile, numbers[k]);
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                dtFiles_Production.Rows[k]["rotation"] = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            dtFiles_Production.Rows[k]["rotation"] = 0;
+                                        }
+                                        System.IO.File.Copy(ImageFile, clientImg, true);
+                                        System.IO.File.Delete(ImageFile);
+
+
+                                        dtFiles_Production.Rows[k]["Annotation"] = fi.DirectoryName + "\\" + fi.Name;
+                                        dtFiles_Production.Rows[k]["Drawing"] = clientLocalPathImg;
+                                        Page_Revision_Details(desFile);
+                                        dtFiles_Production.Rows[k]["CurrentPage"] = drawing_page_no;
+                                        dtFiles_Production.Rows[k]["TotalPage"] = drawing_total_page_no;
+
+                                    }
+                                    IEnumerable<object> results = new List<object>();
+                                    if (dtFiles_Production.Rows.Count > 0)
+                                    {
+                                        results = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.drawingNo.ToString() && w.Revision == searchForm.revNo.ToString()).ToList();
+                                    }
+                                    var returnObject = new List<object>();
+                                    returnObject.Add(dtFiles_Production);
+                                    returnObject.Add(dtFiles_Header);
+                                    returnObject.Add(results);
+                                    var lmtype = Load_MeasureType();
+                                    var lmsubtype = Load_MeasureSubType();
+                                    var units = Load_UOM();
+                                    returnObject.Add(lmtype);
+                                    returnObject.Add(lmsubtype);
+                                    returnObject.Add(new object[] { "Inches" }); // units 
+                                    returnObject.Add(new object[] { "Linear", "Default" }); // Tolerance
+
+                                    return StatusCode(StatusCodes.Status200OK, returnObject);
+                                }
+                                else
+                                {
+                                    return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status204NoContent, "Drawing does not exists against your Search.");
+                                }
+                            }
+                            /*
+                            else
+                            {
+                                try
+                                {
+                                    using (var httpClient = _httpClientFactory.CreateClient("GetDrawingServiceUrlList"))
+                                    {
+                                        HttpResponseMessage res = await httpClient.GetAsync("", HttpCompletionOption.ResponseHeadersRead);
+                                        res.EnsureSuccessStatusCode();
+                                        var responseBody = await res.Content.ReadAsStringAsync();
+                                        var json = JsonConvert.DeserializeObject<JToken>(responseBody);
+                                        var total_photos = json["total_photos"].Value<string>();
+                                        var errorMessage = json["success"].Value<Boolean>();
+                                        var data = json.Value<JToken>("photos");
+                                        DataRow dtHrow;
+                                        DataRow dtFrow;
+
+                                        dtHrow = dtFiles_Header.NewRow();
+                                        dtHrow["DrawingNo"] = searchForm.drawingNo.ToString();
+                                        dtHrow["Part_No"] = "";
+                                        dtHrow["Revision_No"] = searchForm.revNo.ToString();
+                                        dtHrow["PRevisionNo"] = "";
+                                        dtHrow["sessionId"] = sessionUserId;
+                                        dtFiles_Header.Rows.Add(dtHrow);
+
+                                        if (errorMessage)
+                                        {
+                                            int k = 1;
+                                            var total_page = data.Count();
+                                            foreach (var item in data)
+                                            {
+                                                var curs = k++;
+                                                dtFrow = dtFiles_Production.NewRow();
+                                                string Url = Convert.ToString(item.Value<JToken>("url"));
+
+
+                                                string prefix = searchForm.drawingNo.ToString() + "." + searchForm.revNo.ToString() + ".";
+                                                //Uri _uri = new Uri(Url);
+                                                var fileName = prefix + curs.ToString().PadLeft(total_page.ToString().Length, '0') + "-" + total_page + ".png";
+                                                var filePath = clientPath + fileName;
+                                                dtFrow["FileName"] = fileName;
+                                                dtFrow["FilePath"] = filePath;
+                                                dtFrow["rotation"] = 0;
+                                                dtFrow["Annotation"] = filePath;
+                                                dtFrow["Drawing"] = fileName;
+                                                dtFrow["CurrentPage"] = curs;
+                                                dtFrow["TotalPage"] = total_page;
+                                                SaveExternalImage(Url, filePath,curs);
+
+                                                dtFiles_Production.Rows.Add(dtFrow);
+
+                                            }
+
+                                        }
+                                            string rotate = rotateproperties(searchForm.drawingNo, searchForm.revNo, dtFiles_Production); 
+                                        for (int k = 0; k < dtFiles_Production.Rows.Count; k++)
+                                        {
+                                            string tifImg = dtFiles_Production.Rows[k]["FilePath"].ToString();
+                                            string desFile = dtFiles_Production.Rows[k]["FileName"].ToString();
+
+                                                var matches = Regex.Matches(rotate, @"\d+");
+                                                int[] numbers = matches.Cast<Match>().Select(m => int.Parse(m.Value)).ToArray();
+
+                                                if (numbers[k] != 0)
+                                                {
+                                                    dtFiles_Production.Rows[k]["rotation"] = numbers[k];
+                                                    string ImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + desFile);
+                                                    System.IO.File.Copy(tifImg, ImageFile);
+                                                    RotateImagefile(ImageFile, numbers[k]);
+                                                    System.IO.File.Copy(ImageFile, tifImg);
+                                                    System.IO.File.Delete(ImageFile);
+                                                }
+
+                                        }
+                                        IEnumerable<object> results = new List<object>();
+                                        if (dtFiles_Production.Rows.Count > 0)
+                                        {
+                                            results = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.drawingNo.ToString() && w.Revision == searchForm.revNo.ToString()).ToList();
+                                        }
+                                        var returnObject = new List<object>();
+                                        returnObject.Add(dtFiles_Production);
+                                        returnObject.Add(dtFiles_Header);
+                                        returnObject.Add(results);
+                                        var lmtype = Load_MeasureType();
+                                        var lmsubtype = Load_MeasureSubType();
+                                        //var units = Load_UOM();
+                                        returnObject.Add(lmtype);
+                                        returnObject.Add(lmsubtype);
+                                        returnObject.Add(new object[] { "Inches" }); // units 
+                                        returnObject.Add(new object[] { "Linear", "Default" }); // Tolerance         
+
+                                    return StatusCode(StatusCodes.Status200OK, returnObject);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                        objerr.WriteErrorToText(ex);
+                                        return BadRequest("catch:Please Enter Valid Inputs." );
+                                }
+
+                               // return StatusCode(Microsoft.AspNetCore.Http.StatusCodes.Status207MultiStatus, "Please Enter Valid Inputs.");
+                            } 
+                                */
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                objerr.WriteErrorToText(ex);
+                return BadRequest("Oops!.. Something Went wrong.Please Try later.");
+            }
+            return BadRequest("Please Enter Valid Inputs.");
+        }
+
+        List<TesseractNET.OCRResults> ocrres = new List<TesseractNET.OCRResults>();
+        static bool ContainsAlphanumeric(string text)
+        {
+            foreach (char c in text)
+            {
+                if (char.IsLetterOrDigit(c))
+                {
+                    return true; // The text contains at least one alphanumeric character
+                }
+            }
+            return false; // The text does not contain any alphanumeric characters
+        }
+        public string ExcludeOcr(string ocrText)
+        {
+            List<string> l = new List<string> { "scale", "unless", "section", "note", "detail", "-ë-", "--", "DRAWING", "Nî.", "FRAME", "SHEET", "REVISIîN", "SECTION", "D-D", "C-C", "B-B", "A-A", "DETAII.", "LINE", "WITH" };
+            bool isValid = ContainsAlphanumeric(ocrText);
+            if (isValid)
+            {
+                for (var i = 0; i < l.Count; i++)
+                {
+                    if (ocrText.ToLower().Contains(l[i]))
+                    {
+                        break;
+                    }
+                    return ocrText;
+                }
+            }
+            return string.Empty;
+        }
+        private void ocrtextres(string imagfilename)
+        {
+            try
+            {
+                // var image = new OpenCvSharp.Mat(temp, OpenCvSharp.ImreadModes.Color);
+                System.Drawing.Rectangle rectt = new System.Drawing.Rectangle();
+                List<Tesseract.Rect> newrect = new List<Tesseract.Rect>();
+                StringBuilder currentWord = new StringBuilder();
+                using (var engine = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "IMSsym1", EngineMode.Default))
+                {
+                    //image here is Bitmap on which OCR is to be performed
+                    using (var page = engine.Process(Tesseract.Pix.LoadFromFile(imagfilename), Tesseract.PageSegMode.Auto))
+                    {
+                        using (var iterator = page.GetIterator())
+                        {
+
+                            iterator.Begin();
+                            do
+                            {
+                                currentWord.AppendLine(iterator.GetText(Tesseract.PageIteratorLevel.Word));
+                                //do something with bounds 
+                                iterator.TryGetBoundingBox(Tesseract.PageIteratorLevel.Word, out Tesseract.Rect bounds);
+                                newrect.Add(bounds);
+                            }
+                            while (iterator.Next(Tesseract.PageIteratorLevel.Word));
+                        }
+                    }
+                }
+                List<Tesseract.Rect> newrectresult = new List<Tesseract.Rect>();
+                newrectresult = newrect;
+                StringBuilder currentWordresult = new StringBuilder();
+                currentWordresult = currentWord;
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        static Bitmap CropImage(Bitmap img, Rectangle cropArea)
+        {
+            Bitmap croppedImage = img.Clone(cropArea, img.PixelFormat);
+            return croppedImage;
+        }
+
+        static Bitmap ChangeResolution(Bitmap img, int newDpi)
+        {
+            Bitmap newImage = new Bitmap(img.Width, img.Height);
+            newImage.SetResolution(newDpi, newDpi);
+
+            using (Graphics g = Graphics.FromImage(newImage))
+            {
+                g.DrawImage(img, 0, 0);
+            }
+
+            return newImage;
+        }
+        [HttpPost]
+        [Route("SplBalloon")]
+
+        public async Task<ActionResult<AutoBalloon>> SplBalloon(AutoBalloon searchForm)
+        {
+            IEnumerable<object> returnObject = new List<object>();
+            if (_dbcontext.TblConfigurations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                decimal s_x = 0;
+                decimal s_y = 0;
+                decimal s_w = 0;
+                decimal s_h = 0;
+                string dtFiles = searchForm.drawingDetails;
+                FileInfo fi = new FileInfo(dtFiles);
+                string desFile = fi.Name.Replace(fi.Extension, "") + ".png";
+                string OrgPath = dtFiles;
+                string SelImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "SelImageFile_" + Guid.NewGuid().ToString() + desFile);
+                RemoveOpaqueColormapFrom1BPP(OrgPath);
+                List<OCRResults> lstoCRResults = searchForm.originalRegions.Where(x1 => x1.isballooned == true).ToList();
+                if (searchForm.bgImgRotation != 0)
+                {
+                    RotateImagefile(temp, searchForm.bgImgRotation);
+                }
+                System.IO.File.Copy(temp, SelImageFile, true);
+                if (searchForm.selectedRegion == "Spl")
+                {
+                    //System.IO.File.Delete(temp);
+                    List<OCRResults> request = searchForm.originalRegions.Where(x1 => x1.isballooned == false).ToList();
+                    foreach (var obj in request)
+                    {
+                        s_x = obj.x ;
+                        s_y = obj.y ;
+                        s_w = obj.width;
+                        s_h = obj.height;
+                    }
+                    Bitmap resample = new Bitmap(SelImageFile);
+                    Emgu.CV.Mat img = new Emgu.CV.Mat((int) s_w, (int)s_h, DepthType.Cv8U, 3);
+                    img.SetTo(new Bgr(255, 0, 0).MCvScalar);
+                    /*
+                    System.Drawing.RectangleF rectElipse = new System.Drawing.RectangleF((float)obj.x, (float)obj.y, (float)obj.width, (float)obj.height);
+                        lstCircle.Add(new Circle_AutoBalloon { Bounds = rectElipse });
+                        string OriginalImage = OrgPath;
+                        System.Drawing.Rectangle rectElipse1 = new System.Drawing.Rectangle((int)obj.x, (int)obj.y, (int)obj.width + 200, (int)obj.height + 200);
+                        Bitmap originalImage = new Bitmap(SelImageFile);
+                        Bitmap croppedImage = CropImage(originalImage, rectElipse1);
+
+                        // Create a new image with a specific resolution (e.g., 300 DPI)
+                        Bitmap newImage = ChangeResolution(croppedImage, 400);
+                        string cropname = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "cropname_" + Guid.NewGuid().ToString() + $"text_region.png");
+                        // Save or use the new image
+                        newImage.Save(cropname);
+                        temp = cropname;
+                    */
+                    StringBuilder Words = new StringBuilder();
+                    /*
+                        System.Drawing.Image img = System.Drawing.Image.FromFile(temp);
+                        byte[] bytes = null;
+                        byte[] debugBytes = null;
+                        bytes = imageToByteArray(img).ToArray();
+                        int filesize = bytes.Length;
+                    */
+                        String ocredText = string.Empty;
+                        // text = ExtractFromTessract(strExtractImagePath);
+                        Emgu.CV.Mat resul = new Emgu.CV.Mat();
+                        Emgu.CV.Mat source = new Emgu.CV.Mat(temp);
+                        _ocr = new Emgu.CV.OCR.Tesseract(@"C:\Program Files\Tesseract-OCR\tessdata", "IMSsym1", Emgu.CV.OCR.OcrEngineMode.Default);
+                        string ocrtext = OcrImage(_ocr, source, resul);
+                        //ImageTextExtractor _sceneText = new ImageTextExtractor();
+                        //ocrres = _sceneText.NaturalSceneDetectWithRegion(bytes, 0, filesize, out debugBytes);
+
+                        Words.AppendLine(ocrtext);
+                        objerr.WriteErrorLog(" Words " + Words);
+                        //Emgu.CV.Mat source = new Emgu.CV.Mat(cropname,Emgu.CV.CvEnum.ImreadModes.Color);
+                        //Emgu.CV.Mat resul = new Emgu.CV.Mat();
+                        //_ocr = new Emgu.CV.OCR.Tesseract(@"C:\Program Files\Tesseract-OCR\tessdata", "IMSsym1", Emgu.CV.OCR.OcrEngineMode.Default);
+                        //string ocrtext = OcrImage(_ocr, source, resul);
+                        //ocrtext = Regex.Replace(ocrtext, @"\r\n?|\n", "");
+                        bool isplmin = false;
+                        string isplmin_spec = "";
+                        string isplmin_min = "";
+                        string isplmin_max = "";
+                        string isplmin_pltol = "";
+                        string isplmin_mintol = "";
+                        string[] linesArray = ocrtext.Split(new string[] { "\n", Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                        if (ocrtext != "" && ocrtext != null)
+                        {
+                            if (linesArray.Length > 1)
+                            {
+                                if (linesArray[0].Length > 1)
+                                {
+                                    if (linesArray[0].Contains(".") || linesArray[0].Contains("X") || linesArray[0].Any(c => char.IsDigit(c)) || linesArray[0].Contains("°"))
+                                    {
+                                        ocrtext = linesArray[0];
+                                    }
+                                }
+                                else if (linesArray[1].Length > 1)
+                                {
+                                    if (linesArray[1].Contains(".") || linesArray[1].Contains("X") || linesArray[1].Any(c => char.IsDigit(c)) || linesArray[1].Contains("°"))
+                                    {
+                                        ocrtext = linesArray[1];
+                                    }
+                                }
+                                if (linesArray[0].Contains("+"))
+                                {
+                                    isplmin = true;
+                                    isplmin_pltol = linesArray[0].Replace("+", "");
+                                }
+                                if (linesArray[1].Contains("..") || linesArray[1].Contains("-"))
+                                {
+                                    if (linesArray[1].Contains(".."))
+                                    {
+                                        isplmin_spec = linesArray[1].Split("..")[0].Replace("(/)", "¡").Replace("(2)", "¡");
+                                        isplmin_mintol = linesArray[1].Split("..")[1];
+                                        if(!isplmin_mintol.Contains("."))
+                                        {
+                                            isplmin_mintol = "." + isplmin_mintol;
+                                        }
+                                    }
+                                    if (linesArray[1].Contains("-"))
+                                    {
+                                        isplmin_spec = linesArray[1].Split("-")[0];
+                                        if(isplmin_spec.Contains("X"))
+                                        {
+                                            ocrtext = isplmin_spec;
+                                            isplmin_spec = isplmin_spec.Split("X")[1];
+                                        }
+                                        isplmin_mintol = linesArray[1].Split("-")[1];
+                                    }
+                                }
+                            }
+                            Dictionary<string, string> replacements = new Dictionary<string, string>{
+                                    { "ë", "I" },
+                                    { "î.", "O" },
+                                    { "çç", "" },
+                                    { "═", "" },
+                                    { "(","" },
+                                    { ")","" },
+                                    { " ", "" },
+                                    { "ù", "." },
+                                    { "EB", "─" },
+                                    {"XX",""},
+                                     {"³","" },
+                                    {"##","" },
+                                    {"#","" },
+                                     {"..","" },
+                                     {":","" },
+                                      {"«ç","" },
+                                      {"─","" },
+                                      {"H","" }
+                                     };
+                            foreach (var replacement in replacements)
+                            {
+                                ocrtext = ocrtext.Replace(replacement.Key, replacement.Value);
+                            }
+                            if(ocrtext.Contains("X") ||  ocrtext.Contains("R"))
+                            {
+                                ocrtext = ocrtext.Replace("îñ", "03");
+                            }
+                            string Min, Max, Nominal, Type, SubType, Unit, ToleranceType, PlusTolerance, MinusTolerance;
+                            BubbleDrawing.CommonMethods cmt = new BubbleDrawing.CommonMethods();
+                            cmt.GetMinMaxValues(ocrtext.Trim(), out Min, out Max, out Nominal, out Type, out SubType, out Unit, out ToleranceType, out PlusTolerance, out MinusTolerance);
+                            string qty = "1";
+                            int Num_Qty = 1;
+                            int beforeqty = 1;
+                            
+                            bool isDigitPresent = ocrtext.Any(c => char.IsDigit(c));
+                            if (ocrtext.Contains("X") && (isDigitPresent || ocrtext.Contains("°")))
+                            {
+                                if (ocrtext.Length > 2)
+                                {
+                                    int count = Regex.Matches(ocrtext, "X").Count;
+                                    if (count > 1)
+                                    {
+                                        string[] result4 = ocrtext.Split('X');
+                                        if (Char.IsNumber(result4[0], 0))
+                                        {
+                                            qty = result4[0];
+                                        }
+                                        else if (Char.IsNumber(result4[1], 0))
+                                        {
+                                            qty = result4[1];
+                                        }
+                                    }
+                                    else
+                                    {
+                                        qty = ocrtext.Substring(0, ocrtext.IndexOf("X")).Replace(" ", "");
+                                        ocrtext = ocrtext.Replace(qty+"X", "");
+                                    }
+                                }
+                                else
+                                {
+                                    qty = ocrtext.Substring(0, ocrtext.IndexOf("X")).Replace(" ", "");
+                                }
+                                int value;
+                                if (int.TryParse(qty, out value))
+                                    Num_Qty = Convert.ToInt16(qty);
+                                beforeqty = value;
+                            }
+                            Int64 balincid = 1;
+                            for (int k = 1; k <= beforeqty; k++)
+                            {
+                                if (lstoCRResults.Count > 0 && k==1)
+                                {
+                                    balincid = lstoCRResults.Where(r => r.Balloon != null).Max(r => Convert.ToInt64(r.Balloon.Substring(0, r.Balloon.IndexOf('.') > 0 ? r.Balloon.IndexOf('.') : r.Balloon.Length))) + 1;
+                                }
+                                OCRResults oCRResults1 = new OCRResults();
+                                string cnt = k.ToString();
+                                oCRResults1.BaloonDrwID = 0;
+                                oCRResults1.DrawingNumber = searchForm.CdrawingNo;
+                                oCRResults1.Revision = searchForm.CrevNo.ToUpper();
+                                oCRResults1.Page_No = searchForm.pageNo;
+                                oCRResults1.BaloonDrwFileID = desFile;
+                                oCRResults1.ProductionOrderNumber = "N/A";
+                                oCRResults1.Part_Revision = "N/A";
+                                if (beforeqty > 1)
+                                {
+                                    oCRResults1.Balloon = Convert.ToString(string.Join(".", Convert.ToInt16(balincid), cnt));
+                                }
+                                else
+                                {
+                                    oCRResults1.Balloon = Convert.ToString(balincid);
+                                }
+                                oCRResults1.Spec = ocrtext.ToString();
+                                oCRResults1.Nominal = Nominal;
+                                oCRResults1.Minimum = Min;
+                                oCRResults1.Maximum = Max;
+                                oCRResults1.MeasuredBy = createdby;
+                                oCRResults1.MeasuredOn = DateTime.Now;
+                                oCRResults1.Crop_X_Axis = (int)s_x;
+                                oCRResults1.Crop_Y_Axis = (int)s_y;
+                                oCRResults1.Crop_Width = (int)s_w;
+                                oCRResults1.Crop_Height = (int)s_h;
+                                oCRResults1.Circle_X_Axis = (int)s_x;
+                                oCRResults1.Circle_Y_Axis = (int)s_y;
+                                oCRResults1.Circle_Width = 28;
+                                oCRResults1.Circle_Height = 28;
+                                oCRResults1.Type = Type;
+                                oCRResults1.SubType = SubType;
+                                oCRResults1.Unit = Unit;
+                                oCRResults1.Quantity = (int)beforeqty;
+                                if (Min != "" && Max != "")
+                                {
+                                    oCRResults1.ToleranceType = ToleranceType;
+                                }
+                                else
+                                {
+                                    oCRResults1.ToleranceType = "Default";
+                                }
+                                if (ocrtext.Contains("R."))
+                                {
+                                    oCRResults1.ToleranceType = "Linear";
+                                }
+                                oCRResults1.PlusTolerance = PlusTolerance;
+                                oCRResults1.MinusTolerance = MinusTolerance;
+                                oCRResults1.MaxTolerance = "";
+                                oCRResults1.MinTolerance = "";
+                                oCRResults1.CreatedBy = createdby;
+                                oCRResults1.CreatedDate = DateTime.Now;
+                                oCRResults1.ModifiedBy = "";
+                                oCRResults1.ModifiedDate = DateTime.Now;
+                                DrawCircle objDrawCircle = new DrawCircle();
+                                oCRResults1.x = (int)s_x;
+                                oCRResults1.y = (int)s_y;
+                                oCRResults1.width = (int)s_w;
+                                oCRResults1.height = (int)s_h;
+                                oCRResults1.id = "";
+                                oCRResults1.selectedRegion = "Spl";
+                                if (isplmin && isplmin_mintol != "" && isplmin_pltol != "" && isplmin_spec != "")
+                                {
+                                    oCRResults1.Spec = isplmin_spec;
+                                    oCRResults1.Nominal = isplmin_spec;
+                                    try
+                                    {
+                                        oCRResults1.Minimum = Convert.ToString(Convert.ToDecimal(isplmin_spec.Replace("¡", "")) - Convert.ToDecimal(isplmin_mintol));
+                                        oCRResults1.Maximum = Convert.ToString(Convert.ToDecimal(isplmin_spec.Replace("¡", "")) + Convert.ToDecimal(isplmin_pltol));
+                                        oCRResults1.MinusTolerance = Convert.ToString(isplmin_mintol);
+                                        oCRResults1.PlusTolerance = Convert.ToString(isplmin_pltol);
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
+                                    oCRResults1.ToleranceType = "Linear";
+                                    oCRResults1.Type = "Dimension";
+                                    oCRResults1.Unit = "Inches";
+                                    oCRResults1.SubType = "Circularity";
+                                }
+                                lstoCRResults.Add(oCRResults1);
+                            }
+                        }
+                    
+
+                    BubbleDrawingAutomationWeb.Controllers.BalloonController balcon = new BubbleDrawingAutomationWeb.Controllers.BalloonController(_dbcontext);
+                    BubbleDrawingAutomationWeb.Controllers.CreateBalloon objbaldet = new BubbleDrawingAutomationWeb.Controllers.CreateBalloon();
+                    objbaldet.drawingNo = searchForm.CdrawingNo;
+                    objbaldet.revNo = searchForm.CrevNo;
+                    objbaldet.totalPage = searchForm.totalPage;
+                    objbaldet.pageNo = searchForm.pageNo;
+                    objbaldet.rotate = searchForm.rotate;
+                    objbaldet.ballonDetails = lstoCRResults;
+                    returnObject = balcon.create(objbaldet);
+
+                }
+                return StatusCode(StatusCodes.Status200OK, returnObject);
+            }
+        }
+        [HttpPost]
+        [Route("AutoBalloon")]
+        public async Task<ActionResult<AutoBalloon>> AutoBalloon(AutoBalloon searchForm)
+        {
+            if (_dbcontext.TblConfigurations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                if (searchForm.selectedRegion == "FullImage")
+                {
+                    var hdr = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Revision == searchForm.CrevNo.ToString() && w.Page_No == searchForm.pageNo).FirstOrDefault();
+                    if (hdr != null)
+                    {
+                        ResetBalloon objreset = new ResetBalloon();
+                        objreset.pageNo = searchForm.pageNo;
+                        objreset.CrevNo = searchForm.CrevNo;
+                        objreset.CdrawingNo = searchForm.CdrawingNo;
+                        resetBalloons(objreset);
+                    }
+                }
+                //ocrtextres(searchForm.drawingDetails);
+                string[] skipwords = { "DRAWING", "Nî.", "FRAME", "SHEET", "REVISIîN", "SECTION", "D-D", "C-C", "B-B", "A-A", "DETAII.", "LINE", "WITH", "WIDTH", "SLOT", "SLOTS", "LEAD", "HAND", "I.EFT", "RIGHT", "SEE", "LINEWITH", "IN", "E-", "(COAT", "PER", "BOM", "FLATS", "CONFIGURATION", "FLAT", "EB", searchForm.CdrawingNo.ToLower(), searchForm.CdrawingNo.ToUpper(), searchForm.CdrawingNo, searchForm.CrevNo, searchForm.CrevNo.ToLower(), searchForm.CrevNo.ToUpper() };
+                string drawingNo = searchForm.CdrawingNo;
+                string revNo = searchForm.CrevNo;
+                string dtFiles = searchForm.drawingDetails;
+                double _aspectRatio = searchForm.aspectRatio;
+                double bgImgW = searchForm.bgImgW;
+                double bgImgH = searchForm.bgImgH;
+                string selectedRegion = searchForm.selectedRegion;
+                int bgImgRotation = searchForm.bgImgRotation;
+                int pageNo = searchForm.pageNo;
+                int totalPage = searchForm.totalPage;
+                string env = this._appSettings.ENVIRONMENT;
+                string finame = string.Empty;
+                FileInfo fi = new FileInfo(dtFiles);
+                finame = dtFiles;
+                string desFile = fi.Name.Replace(fi.Extension, "") + ".png";
+                string OrgPath = dtFiles;
+                if (env != "development")
+                {
+                    OrgPath = dtFiles.Replace(desFile, "") + "\\drawing\\" + desFile;
+                }
+                int ItemView = searchForm.ItemView;
+                List<OCRResults> lstoCRResults = new List<OCRResults>();
+                RemoveOpaqueColormapFrom1BPP(OrgPath);
+                if (bgImgRotation != 0)
+                {
+                    RotateImagefile(temp, bgImgRotation);
+                }
+                string ImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "ImageFile_" + Guid.NewGuid().ToString() + desFile);
+                string SelImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "SelImageFile_" + Guid.NewGuid().ToString() + desFile);
+                string processImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "processImageFile_" + Guid.NewGuid().ToString() + desFile);
+                System.IO.File.Copy(temp, ImageFile, true);
+                System.IO.File.Copy(temp, SelImageFile, true);
+                System.IO.File.Copy(temp, processImageFile, true);
+
+                decimal s_x = 0;
+                decimal s_y = 0;
+                decimal s_w = 0;
+                decimal s_h = 0;
+                // Test Start
+                if (searchForm.selectedRegion == "Selected Region")
+                {
+                    System.IO.File.Delete(temp);
+                    List<OCRResults> request = searchForm.originalRegions.Where(x1 => x1.isballooned == false).ToList();
+                    foreach (var obj in request)
+                    {
+                        s_x = obj.x;
+                        s_y = obj.y;
+                        s_w = obj.width;
+                        s_h = obj.height;
+
+                    }
+                    //float cmtoin = 0.393701f;
+                    Bitmap resample = new Bitmap(SelImageFile);
+                    System.Drawing.Rectangle rectE = new System.Drawing.Rectangle((int) s_x, (int) s_y, (int) s_w, (int) s_h);
+                    Bitmap croppedImage = CropImage(resample, rectE);
+                    //Bitmap newImage = new Bitmap( (int) s_w, (int) s_h );
+                    //newImage.SetResolution( (float) s_w / cmtoin, (float) s_h / cmtoin );
+                    string cropnam = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "cropname_" + Guid.NewGuid().ToString() + $"text_region.png");
+                    croppedImage.Save(cropnam);
+                    //using (Graphics g = Graphics.FromImage(newImage))
+                    //{
+                    //    g.DrawImage(croppedImage, 0, 0);
+                    //    croppedImage.Save(cropnam);
+                    //}
+                    var imgg = new OpenCvSharp.Mat(cropnam, OpenCvSharp.ImreadModes.Color);
+                    var grayy = new OpenCvSharp.Mat();
+                    Cv2.CvtColor(imgg, grayy, ColorConversionCodes.BGR2GRAY);
+                    Cv2.Threshold(grayy, grayy, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+                    OpenCvSharp.Mat inverted = new OpenCvSharp.Mat();
+                    Cv2.BitwiseNot(grayy, inverted);
+
+                    string tempImageP = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + "temp_image.png");
+                    inverted.SaveImage(tempImageP);
+
+                    var ocr = OpenCvSharp.Text.OCRTesseract.Create();
+                    var mat = new OpenCvSharp.Mat(tempImageP);
+                    ocr.Run(
+                            mat,
+                            out var outputText,
+                            out var componentRects,
+                            out var componentTexts,
+                            out var componentConfidences,
+                            OpenCvSharp.Text.ComponentLevels.TextLine
+                        );
+                    Console.WriteLine("Text: => " + outputText);
+                    mat.Release();
+                    mat.Dispose();
+                }
+                // Test end
+
+
+                string fname = "";
+                string croppedname = string.Empty;
+                int imagewidth = 0;
+                int imageheight = 0;
+                if (searchForm.selectedRegion == "Selected Region")
+                {
+                    System.IO.File.Delete(temp);
+                    List<OCRResults> request = searchForm.originalRegions.Where(x1 => x1.isballooned == false).ToList();
+                    foreach (var obj in request)
+                    {
+                        s_x = obj.x;
+                        s_y = obj.y;
+                        s_w = obj.width;
+                        s_h = obj.height;
+                        System.Drawing.RectangleF rectElipse = new System.Drawing.RectangleF((float)obj.x, (float)obj.y, (float)obj.width, (float)obj.height);
+                        lstCircle.Add(new Circle_AutoBalloon { Bounds = rectElipse });
+                        string OriginalImage = OrgPath;
+                        System.Drawing.Rectangle rectElipse1 = new System.Drawing.Rectangle((int)obj.x, (int)obj.y, (int)obj.width + 200, (int)obj.height + 200);
+                        Bitmap originalImage = new Bitmap(SelImageFile);
+                        Bitmap croppedImage = CropImage(originalImage, rectElipse1);
+                        Bitmap newImage = ChangeResolution(croppedImage, 600);
+                        string cropname = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "cropname_" + Guid.NewGuid().ToString() + $"text_region.png");
+                        // Save or use the new image
+                        newImage.Save(cropname);
+                        temp = cropname;
+                        /*System.Drawing.Image oimage = System.Drawing.Image.FromFile(SelImageFile);
+                        System.Drawing.Rectangle rect = new System.Drawing.Rectangle((int)obj.x, (int)obj.y, (int)obj.width, (int)obj.height);
+                        System.Drawing.Image crop = BubbleDrawing.CommonMethods.cropImage(oimage, rect);
+                        string cropname = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "cropname_" + Guid.NewGuid().ToString() + $"text_region.png");
+                        crop.Save(cropname, System.Drawing.Imaging.ImageFormat.Png);
+                        oimage.Dispose();
+                        RemoveOpaqueColormapFrom1BPP(cropname);*/
+                    }
+                }
+                else if (searchForm.selectedRegion == "Unselected Region")
+                {
+                    List<OCRResults> request = searchForm.originalRegions.Where(x1 => x1.isballooned == false).ToList();
+                    foreach (var obj in request)
+                    {
+                        System.Drawing.RectangleF rectElipse = new System.Drawing.RectangleF((float)obj.x, (float)obj.y, (float)obj.width, (float)obj.height);
+                        lstCircle.Add(new Circle_AutoBalloon { Bounds = rectElipse });
+                    }
+                }
+                var image = new OpenCvSharp.Mat(temp, OpenCvSharp.ImreadModes.Color);
+                if (searchForm.selectedRegion == "Full Image" || searchForm.selectedRegion == "Selected Region" || searchForm.selectedRegion == "Unselected Region")
+                {
+                    image = new OpenCvSharp.Mat(ImageFile, OpenCvSharp.ImreadModes.Color);
+                    imagewidth = image.Width;
+                    imageheight = image.Height;
+                }
+                if (searchForm.selectedRegion == "Selected Region")
+                {
+                    image = new OpenCvSharp.Mat(temp, OpenCvSharp.ImreadModes.Color);
+                }
+                if (searchForm.selectedRegion != "Unselected Region")
+                {
+                    List<OCRResults> request1 = searchForm.originalRegions.Where(x1 => x1.isballooned == true).ToList();
+                    lstoCRResults = request1;
+                }
+                else
+                {
+                    List<OCRResults> request1 = searchForm.originalRegions.Where(x1 => (x1.isballooned == true && x1.Page_No != pageNo)).ToList();
+                    lstoCRResults = request1;
+                }
+                List<AutoBalloon_OCR> auto_ocrresults = new List<AutoBalloon_OCR>();
+                
+                using (var image1 = new OpenCvSharp.Mat(ImageFile, OpenCvSharp.ImreadModes.Color))
+                using (var graya = new OpenCvSharp.Mat())
+                {
+                    Cv2.CvtColor(image1, graya, ColorConversionCodes.BGR2GRAY);
+                    Cv2.Threshold(graya, graya, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+                    OpenCvSharp.Mat invertedImage = new OpenCvSharp.Mat();
+                    Cv2.BitwiseNot(graya, invertedImage);
+                    string tempImagePath1 = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + "temp_image.png");
+                    invertedImage.SaveImage(tempImagePath1);
+
+                    using (var engine = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "IMSsym1", EngineMode.Default))
+                    {
+                      
+                        System.Drawing.Rectangle rectElipse1 = new System.Drawing.Rectangle((int)s_x, (int)s_y, (int)s_w, (int)s_h);
+                        Bitmap OI = new Bitmap(tempImagePath1);
+                        Bitmap cropped = CropImage(OI, rectElipse1);
+                        string tempImagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + "temp_image.png");
+                        cropped.Save(tempImagePath);
+                        using (var textPage = engine.Process(Tesseract.Pix.LoadFromFile(tempImagePath), Tesseract.PageSegMode.CircleWord))
+                        {
+                          // string w = textPage.GetText();
+                            using (var iter = textPage.GetIterator())
+                            {
+                                iter.Begin();
+                                do
+                                {
+                                    if (iter.TryGetBoundingBox(Tesseract.PageIteratorLevel.Word, out var textLineBox))
+                                    {
+                                        string word = iter.GetText(Tesseract.PageIteratorLevel.Word);
+                                        Console.WriteLine(word);
+                                    }
+                                } while (iter.Next(Tesseract.PageIteratorLevel.Word));
+                            }
+                                
+                        }
+                    }
+                }
+
+
+                using (var gray = new OpenCvSharp.Mat())
+                using (var engine = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "IMSsym1", EngineMode.Default))
+                {
+                    Cv2.CvtColor(image, gray, ColorConversionCodes.BGR2GRAY);
+                   // OpenCvSharp.Mat kernel = new OpenCvSharp.Mat(3, 3, MatType.CV_32F, new float[] { -1, -1, -1, -1, 9, -1, -1, -1, -1 });
+
+                    // Apply the filter using Filter2D
+                   // Cv2.Filter2D(image, image, image.Depth(), kernel);
+
+                    Cv2.Threshold(gray, gray, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+                   // Cv2.GaussianBlur(image, image, new OpenCvSharp.Size((int)s_x, (int)s_y), 0);
+
+
+                    // Invert the image
+                    OpenCvSharp.Mat invertedImage = new OpenCvSharp.Mat();
+                    Cv2.BitwiseNot(gray, invertedImage);
+                    string tempImagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + "temp_image.png");
+                    invertedImage.SaveImage(tempImagePath);
+
+                    // Perform OCR on the text block
+                    using (var blockPage = engine.Process(Tesseract.Pix.LoadFromFile(tempImagePath), Tesseract.PageSegMode.Auto))
+                    {
+                        using (var iter = blockPage.GetIterator())
+                        {
+                            iter.Begin();
+                            List<WordInfo> wordInfos = new List<WordInfo>();
+                            StringBuilder Words = new StringBuilder();
+                            int regionIndex = 0;
+                            int kk = 1;
+                            int aftheight = 320;
+                            string aftscaleval = "";
+                            bool isscalstr = false;
+                            List<string> lstautobalocr = new List<string>();
+                            do
+                            {
+                                if (iter.TryGetBoundingBox(Tesseract.PageIteratorLevel.Word, out var textLineBox))
+                                {
+                                    // Create a Rect object using OpenCvSharp 's bounding box coordinates
+                                    OpenCvSharp.Rect textRegionRect = new OpenCvSharp.Rect(textLineBox.X1, textLineBox.Y1, textLineBox.X2 - textLineBox.X1, textLineBox.Y2 - textLineBox.Y1);
+                                    string word = iter.GetText(Tesseract.PageIteratorLevel.Word);
+                                    string regionText = word;
+                                    if (regionText == "" || regionText == null || regionText == " ")
+                                    {
+                                        continue;
+                                    }
+                                    if (regionText.Contains("R.îñ"))
+                                    {
+                                        regionText = "R.03";
+                                    }
+                                    WordInfo wordInfo = new WordInfo
+                                    {
+                                        Text = regionText,
+                                        BoundingBox = textRegionRect
+                                    };
+                                    Words.AppendLine(regionText);
+                                    if (regionText != "")
+                                    {
+                                        wordInfos.Add(wordInfo);
+                                    }
+                                    if (regionText.Contains("+") && regionText.Contains(")"))
+                                    {
+                                        regionText = regionText.Substring(0, regionText.IndexOf(")", regionText.IndexOf(")") + 1));
+                                    }
+                                    Dictionary<string, string> replacements = new Dictionary<string, string>{
+                                    { "ë", "I" },
+                                    { "î.", "O" },
+                                    { "çç", "" },
+                                    { "═", "" },
+                                    { "(","" },
+                                    { ")","" },
+                                    { " ", "" },
+                                    { "ù", "." },
+                                    { "EB", "─" },
+                                    {"XX",""},
+                                     {"³","" },
+                                    {"##","" },
+                                     {"..","" },
+                                     {":","" },
+                                      {"«ç","" },
+                                      {"─","" },
+                                      {"H","" }
+                                     };
+                                    foreach (var replacement in replacements)
+                                    {
+                                        regionText = regionText.Replace(replacement.Key, replacement.Value);
+                                    }
+                                    int index = auto_ocrresults.Count - 1;
+                                    if (index != -1 && regionText == "PLACES")
+                                        auto_ocrresults.RemoveAt(index);
+                                    if (regionText.Contains("SCALE"))
+                                    {
+                                        isscalstr = true;
+                                        continue;
+                                    }
+                                    if (isscalstr)
+                                    {
+                                        isscalstr = false;
+                                        continue;
+                                    }
+                                    //regionText = regionText.Replace("ë", "I").Replace("═", "").Replace("XX", "");
+                                    regionText = Regex.Replace(regionText, @"\r\n?|\n", "");
+                                    string brackets = @"[\(\)]";
+                                    if (regionText.Contains("ç") && regionText.Contains("°"))
+                                    {
+                                        continue;
+                                    }
+                                    regionText = Regex.Replace(regionText, brackets, "");
+                                    if (searchForm.selectedRegion == "Full Image")
+                                    {
+                                        string[] stringArray = { "unless", "PRODUCTS" };
+                                        if ((stringArray.Any(s => regionText.ToLower().Contains(s.ToLower()))))
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    //bool isletonly= Regex.IsMatch(regionText, @"^[a-zA-Z]+$");
+                                    bool Is_Need_Ocr = true;
+                                    bool isDigitPresent1 = regionText.Any(c => char.IsDigit(c));
+                                    if (regionText.Contains("X") && (isDigitPresent1 == false && !regionText.Contains("°")))
+                                    {
+                                        Is_Need_Ocr = false;
+                                    }
+                                    if (regionText.Contains("çç") || regionText.Contains("II"))
+                                    {
+                                        Is_Need_Ocr = false;
+                                    }
+                                    if (regionText.Contains(".") && !regionText.Contains("¡"))
+                                    {
+
+                                        var res1 = regionText.Split('.').Last();
+                                        if (Regex.IsMatch(res1, @"^[a-zA-Z]+$"))
+                                        {
+                                            Is_Need_Ocr = false;
+                                        }
+                                        if (res1.Length == 0)
+                                        {
+                                            Is_Need_Ocr = false;
+                                        }
+                                        string[] res2 = regionText.Split('.');
+                                        if (res2[0] == "»" || res2[0] == "«")
+                                        {
+                                            Is_Need_Ocr = false;
+                                        }
+                                    }
+                                    string result = skipwords.FirstOrDefault(x => x == regionText);
+                                    if (result != null)// || isletonly==true)
+                                    {
+                                        Is_Need_Ocr = false;
+                                    }
+                                    string pattern = @"^\d+0F\d+$";
+                                    Regex regex = new Regex(pattern);
+                                    MatchCollection matches = regex.Matches(regionText);
+                                    if (matches.Count() > 0)
+                                    {
+                                        continue;
+                                    }
+                                    if (regionText.IndexOf('¡') != regionText.LastIndexOf('¡'))
+                                    {
+                                        continue;
+                                    }
+                                    if (regionText.Contains("T") || regionText.Contains("#") || regionText.Contains("ZZ") || regionText.Contains("//") || regionText.Contains("/") || regionText.Contains("--") || regionText.Contains(",,") || regionText.Contains("C") || regionText.Contains("D") || regionText.Contains(":") || regionText.Contains("î") || regionText.Contains("K") || regionText.Contains("VV") || regionText.Contains("SS") || regionText.Contains("HF") || regionText.Contains("çV") || regionText.Contains("7V") || regionText.Contains("I") || regionText.Contains("W«") || regionText.Contains("Mç") || (regionText.Contains("22") && !regionText.Contains(".")))
+                                    {
+                                        if (regionText.Length > 1 || regionText.Contains("-"))
+                                        {
+                                            if (regionText.Contains("-"))
+                                            {
+                                                string[] minussym = regionText.Split("-");
+                                                if (Regex.IsMatch(minussym[0], @"^[0-9]+$") || Regex.IsMatch(minussym[1], @"^[0-9]+$") || isDigitPresent1)
+                                                {
+                                                    regionText = regionText.Replace("-", ".");
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Is_Need_Ocr = false;
+                                            }
+
+                                        }
+                                        else if (regionText.Length > 0)
+                                        {
+                                            Is_Need_Ocr = false;
+                                        }
+                                    }
+                                    int finalyaxis = imageheight - 200;
+                                    int finalxaxis = imagewidth - 200;
+                                    if (regionText.Contains("±") || regionText.Contains("û"))
+                                    {
+                                        regionText = Regex.Replace(regionText, "[A-Za-z ]", "");
+                                        regionText = regionText.Replace("û", "");
+                                    }
+                                    if (regionText.Contains(".."))
+                                    {
+                                        var res11 = regionText.Split("..");
+                                        if (res11.Length > 0)
+                                        {
+                                            if (res11[1].Length > 0)
+                                            {
+                                                regionText = regionText.Replace("..", "");
+                                            }
+                                        }
+                                    }
+                                    if (regionText.Contains("¡"))
+                                    {
+                                        var res11 = regionText.Split('¡');
+                                        if (res11.Length > 0)
+                                        {
+                                            if (res11[1].Any(c => char.IsDigit(c)) == false)
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                    if (regionText.Contains("-"))
+                                    {
+                                        var res1 = regionText.Split('-');
+                                        if (res1.Length > 0)
+                                        {
+                                            if ((res1[0].Any(c => char.IsDigit(c))))
+                                            {
+                                                regionText = regionText.Replace("-", ".");
+                                                if (regionText.Contains(".."))
+                                                {
+                                                    var res11 = regionText.Split("..");
+                                                    if (res11.Length > 0)
+                                                    {
+                                                        if (res11[1].Length == 0)
+                                                        {
+                                                            regionText = regionText.Replace("..", "");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else if (regionText.Contains("X"))
+                                            {
+                                                regionText = regionText.Replace("-", "");
+                                                int count = Regex.Matches(regionText, "X").Count;
+                                                if (count > 1)
+                                                {
+                                                    string[] cntt = regionText.Split("X");
+                                                    if (cntt[0] == "")
+                                                    {
+                                                        regionText = regionText.Remove(0, 1);
+
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Is_Need_Ocr = false;
+                                            }
+                                        }
+                                    }
+                                    if (regionText != "" && Is_Need_Ocr == true)
+                                    {
+                                        var confidence = iter.GetConfidence(Tesseract.PageIteratorLevel.Word);
+                                        //if (confidence >= 0.06f)
+                                        //{
+                                        if ((searchForm.selectedRegion != "Selected Region"))
+                                        {
+                                            if (textLineBox.Y1 > aftheight && (textLineBox.Y2 <= finalyaxis))
+                                            {
+                                                if (auto_ocrresults.Count == 0)
+                                                {
+                                                    if (regionText == "10" || regionText == "11" || regionText == "12" || regionText == "13" || regionText == "14" || regionText == "15" || regionText == "16" || regionText == "17" || regionText == "18" || regionText == "20" || regionText == "21" || regionText == "22" || regionText == "23" || regionText == "24" || regionText == "25" || regionText == "26" || regionText == "27" || regionText == "28" || regionText == "29" || regionText == "30")
+                                                    {
+                                                        aftheight = textLineBox.Y1 + 450;
+                                                        continue;
+                                                    }
+                                                }
+                                                auto_ocrresults.Add(new AutoBalloon_OCR { Ocr_Text = regionText, X_Axis = textLineBox.X1, Y_Axis = textLineBox.Y1, Width = textLineBox.X2 - textLineBox.X1, Height = textLineBox.Y2 - textLineBox.Y1, Qty = 1, No = kk });
+
+                                                kk++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            auto_ocrresults.Add(new AutoBalloon_OCR { Ocr_Text = regionText, X_Axis = textLineBox.X1, Y_Axis = textLineBox.Y1, Width = textLineBox.X2 - textLineBox.X1, Height = textLineBox.Y2 - textLineBox.Y1, Qty = 1, No = kk });
+
+                                            kk++;
+                                        }
+                                    }
+                                    regionIndex++;
+                                }
+                            } while (iter.Next(Tesseract.PageIteratorLevel.Word));
+                    
+                        objerr.WriteErrorLog(" Words " + Words);
+                        }
+                    }
+                }
+
+                string prev_ocrtext = "";
+                int ij = 1;
+                int beforeqty = 1;
+                int dotbaldis = 0;
+                int ballondrawedno = 0;
+                bool isplmin = false;
+                string isplmin_spec = "";
+                string isplmin_min = "";
+                string isplmin_max = "";
+                string isplmin_pltol = "";
+                string isplmin_mintol = "";
+                string afterocrtext = "";
+                string secafterocrtext = "";
+                Int64 balincid = 0;
+                int ploccur_x = 0;
+                int ploccur_y = 0;
+                int ploccur_no = 0;
+                string ploccur_ocrtxt = "";
+                foreach (var ii in auto_ocrresults)
+                {
+                    if (lstoCRResults.Count > 0)
+                    {
+                        balincid = lstoCRResults.Where(r => r.Balloon != null).Max(r => Convert.ToInt64(r.Balloon.Substring(0, r.Balloon.IndexOf('.') > 0 ? r.Balloon.IndexOf('.') : r.Balloon.Length))) + 1;
+                    }
+                    else
+                    {
+                        balincid = 1;
+                    }
+                    string ocrtext = ii.Ocr_Text;
+                    string Min, Max, Nominal, Type, SubType, Unit, ToleranceType, PlusTolerance, MinusTolerance;
+                    BubbleDrawing.CommonMethods cmt = new BubbleDrawing.CommonMethods();
+                    cmt.GetMinMaxValues(ocrtext.Trim(), out Min, out Max, out Nominal, out Type, out SubType, out Unit, out ToleranceType, out PlusTolerance, out MinusTolerance);
+                    int Num_Qty = 1;
+                    int maxpreqty = 1;
+                    int beforeid = 1;
+                    bool isDigitPresent = ocrtext.Any(c => char.IsDigit(c));
+                    if (searchForm.selectedRegion == "Full Image" || searchForm.selectedRegion == "Unselected Region")
+                    {
+                        if (ocrtext.Contains("+") && ocrtext.Length > 1)
+                        {
+                            ploccur_x = ii.X_Axis;
+                            ploccur_y = ii.Y_Axis;
+                            ploccur_no = ii.No;
+                            ploccur_ocrtxt = ii.Ocr_Text;
+                            continue;
+                        }
+                        if (ploccur_no > 0)
+                        {
+                            if (ii.X_Axis == ploccur_x - 216 && ii.Y_Axis == ploccur_y + 50)
+                            {
+                                isplmin_pltol = ploccur_ocrtxt.Replace("+", "");
+                                isplmin = true;
+                            }
+                            try
+                            {
+                                if (ocrtext.Contains("."))
+                                {
+                                    int cnn = ocrtext.Count(x => x == '.');
+                                    if (cnn > 2)
+                                    {
+                                        try
+                                        {
+                                            isplmin_spec = ocrtext.Substring(0, ocrtext.IndexOf(".", ocrtext.IndexOf(".") + 1));
+                                            int dotFirstIndex = ocrtext.IndexOf('.');
+                                            int dotLastIndex = ocrtext.LastIndexOf('.');
+                                            string result = ocrtext.Substring((dotFirstIndex + 1), (dotLastIndex - dotFirstIndex) + 2);
+                                            var ind1 = result.IndexOf('.');
+                                            var ind2 = result.IndexOf('.', ind1);
+                                            isplmin_mintol = result.Substring(ind1 + ind2 - 1);
+                                        }
+                                        catch (Exception)
+                                        {
+
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (ii.No == 1 && isDigitPresent && !ocrtext.Contains("+") && !ocrtext.Contains("±") && !ocrtext.Contains("X") && isplmin)
+                        {
+                            isplmin_spec = ocrtext;
+                            continue;
+                        }
+                        if (ocrtext.Contains("+"))
+                        {
+                            isplmin = true;
+
+                            if (ocrtext.Length == 1)
+                            {
+                                var nextocr = auto_ocrresults.Where(x => x.No == ii.No + 1)
+                                              .Select(x => x.Ocr_Text)
+                                              .FirstOrDefault();
+                                if (!nextocr.Contains("."))
+                                {
+                                    isplmin_pltol = "." + nextocr;
+                                }
+                                var nextocr1 = auto_ocrresults.Where(x => x.No == ii.No + 2)
+                                                .Select(x => x.Ocr_Text)
+                                                .FirstOrDefault();
+                                var nextocr2 = auto_ocrresults.Where(x => x.No == ii.No + 3)
+                                                .Select(x => x.Ocr_Text)
+                                                .FirstOrDefault();
+                                var nextocr3 = auto_ocrresults.Where(x => x.No == ii.No + 4)
+                                                .Select(x => x.Ocr_Text)
+                                                .FirstOrDefault();
+                                if (nextocr1.Contains(".") && nextocr1.Contains("¡") && nextocr1 != "" && nextocr2 != "")
+                                {
+                                    isplmin_spec = nextocr1 + nextocr2.Replace(".", "");
+                                }
+                                if (nextocr3 != "")
+                                {
+                                    isplmin_mintol = "." + nextocr3;
+                                }
+                            }
+                            else
+                            {
+                                if (ocrtext.LastIndexOf('+') == ocrtext.Length - 1)
+                                {
+                                    isplmin_spec = ocrtext.Replace("+", ""); ;
+                                }
+                                else
+                                {
+                                    isplmin_pltol = ocrtext.Replace("+", "");
+                                }
+                                continue;
+                            }
+                        }
+                        else if (isplmin && (ocrtext.Contains("-") || ocrtext.Contains("..") || ocrtext.Contains(".")))
+                        {
+                            isplmin = true;
+                            if (ocrtext.Contains(".."))
+                            {
+                                string[] spltxt = ocrtext.Split("..");
+                                isplmin_spec = spltxt[0];
+                                isplmin_mintol = spltxt[1].Replace("-", "");
+                                string pattern11 = @"^\.+$";
+                                Regex regex11 = new Regex(pattern11);
+                                MatchCollection matches11 = regex11.Matches(isplmin_mintol);
+                                if (matches11.Count == 0)
+                                {
+                                    isplmin_mintol = "." + isplmin_mintol;
+                                }
+                            }
+                            else if (ocrtext.Contains("."))
+                            {
+                                isplmin_spec = ocrtext.Substring(0, ocrtext.IndexOf(".", ocrtext.IndexOf(".") + 1));
+
+                                int count1 = ocrtext.Count(x => x == '.');
+                                if (count1 == 2)
+                                {
+                                    var splvals = ocrtext.Split(".")[2];
+                                    int aStr = isplmin_pltol.Length - isplmin_pltol.IndexOf(".") - 1;
+                                    isplmin_mintol = splvals.Insert(splvals.Length - aStr, ".");
+                                }
+
+                            }
+                            else
+                            {
+                                isplmin_mintol = ocrtext.Replace("-", "");
+                            }
+                            if (ii.No != auto_ocrresults.Count)
+                            {
+                                continue;
+                            }
+
+                        }
+                    }
+                    if (ocrtext.Contains("X") && isDigitPresent)
+                    {
+                        string qty = "";
+                        if (ocrtext.Length > 2)
+                        {
+                            int count = Regex.Matches(ocrtext, "X").Count;
+                            if (count > 1)
+                            {
+                                string[] result4 = ocrtext.Split('X');
+                                if (Char.IsNumber(result4[0], 0))
+                                {
+                                    qty = result4[0];
+                                }
+                                else if (Char.IsNumber(result4[1], 0))
+                                {
+                                    qty = result4[1];
+                                }
+                            }
+                            else
+                            {
+                                qty = ocrtext.Substring(0, ocrtext.IndexOf("X")).Replace(" ", "");
+                            }
+                        }
+                        else
+                        {
+                            qty = ocrtext.Substring(0, ocrtext.IndexOf("X")).Replace(" ", "");
+                        }
+                        int value;
+                        if (int.TryParse(qty, out value))
+                            Num_Qty = Convert.ToInt16(qty);
+                        beforeqty = value;
+                        string[] s = ocrtext.Split('X');
+                        if (s.Length > 1)
+                        {
+                            ocrtext = s[1].Replace(",", "").Replace("O", "°");
+                            try
+                            {
+                                if (Convert.ToInt16(ocrtext) == beforeqty)
+                                {
+                                    foreach (var jj in auto_ocrresults.Where(r => r.No == ii.No))
+                                    {
+                                        jj.Qty = beforeqty;
+                                    }
+                                    continue;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                            string tmp = Regex.Replace(ocrtext, "[^$0-9.]", "");
+                            if (tmp != "")
+                            {
+                                cmt.GetMinMaxValues(tmp.Trim(), out Min, out Max, out Nominal, out Type, out SubType, out Unit, out ToleranceType, out PlusTolerance, out MinusTolerance);
+                            }
+                            if (ocrtext != "")
+                            {
+                                foreach (var jj in auto_ocrresults.Where(r => r.No == ii.No))
+                                {
+                                    jj.Qty = beforeqty;
+                                }
+                                maxpreqty = beforeqty;
+                            }
+                            else
+                            {
+                                if (beforeqty > 1)
+                                {
+                                    foreach (var jj in auto_ocrresults.Where(r => r.No == ii.No))
+                                    {
+                                        jj.Qty = beforeqty;
+                                    }
+                                    maxpreqty = beforeqty;
+                                }
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            foreach (var jj in auto_ocrresults.Where(r => r.No == ii.No))
+                            {
+                                jj.Qty = beforeqty;
+                            }
+                            continue;
+                        }
+                        foreach (var jj in auto_ocrresults.Where(r => r.No == ii.No))
+                        {
+                            jj.Qty = beforeqty;
+                        }
+                    }
+                    OCRResults oCRResults = new OCRResults();
+                    System.Drawing.RectangleF rectElipse = new System.Drawing.RectangleF(ii.X_Axis, ii.Y_Axis, ii.Width, ii.Height);
+                    Circle_AutoBalloon hitCircle2 = lstCircle.FirstOrDefault(x1 => x1.Bounds.Contains(rectElipse.Location));
+                    if ((searchForm.selectedRegion == "Full Image" && hitCircle2 == null) || (searchForm.selectedRegion == "Unselected Region" && hitCircle2 == null) || (searchForm.selectedRegion == "Selected Region"))
+                    {
+                        beforeid = ii.No - 1;
+                        if (maxpreqty > 1)
+                        {
+                            beforeid = ii.No;
+                        }
+                        beforeqty = auto_ocrresults.Where(x => x.No == beforeid)
+                      .Select(x => x.Qty)
+                      .FirstOrDefault();
+
+                        if (afterocrtext == ii.Ocr_Text || secafterocrtext == ii.Ocr_Text)
+                        {
+                            if (secafterocrtext == ii.Ocr_Text)
+                            {
+                                afterocrtext = "";
+                                secafterocrtext = "";
+                            }
+                            continue;
+                        }
+                        if (ii.Ocr_Text == "ç")
+                        {
+                            afterocrtext = auto_ocrresults.Where(x => x.No == ii.No + 1).Select(x => x.Ocr_Text).FirstOrDefault();
+                            secafterocrtext = auto_ocrresults.Where(x => x.No == ii.No + 2).Select(x => x.Ocr_Text).FirstOrDefault();
+                            ocrtext = ii.Ocr_Text + afterocrtext + secafterocrtext;
+                        }
+                        bool isletonly = Regex.IsMatch(ocrtext, @"^[a-zA-Z]+$");
+                        if (isletonly || ocrtext.Length <= 1 || ocrtext == "" || ocrtext == "X")
+                        {
+                            continue;
+                        }
+                        if (Regex.IsMatch(ocrtext, @"^[a-zA-Z.]+$"))
+                        {
+                            continue;
+                        }
+                        if (ocrtext.Contains("7V") || ocrtext.Contains("çV") || (ocrtext.Contains("ç") && ocrtext.Contains("°")) || ocrtext.Contains("çç") || ocrtext.Contains("43X") || ocrtext.Contains("Xç") || ocrtext.Contains("///") || ocrtext.Contains("7Z") || ocrtext.Contains("ZZ") || ocrtext.Contains("J.") || ocrtext.Contains("±V") || ocrtext.Contains("Zç"))
+                        {
+                            continue;
+                        }
+
+                        if (ocrtext == "63")
+                        {
+                            ocrtext = "»";
+                        }
+                        if (ocrtext == "45Z")
+                        {
+                            ocrtext = "45°";
+                        }
+                        if (beforeqty > 1 || maxpreqty > 1)
+                        {
+                            for (int k = 1; k <= beforeqty; k++)
+                            {
+                                if (k == 1)
+                                {
+                                    dotbaldis++;
+                                }
+                                OCRResults oCRResults1 = new OCRResults();
+                                string cnt = k.ToString();
+                                oCRResults1.BaloonDrwID = 0;
+                                oCRResults1.DrawingNumber = drawingNo;
+                                oCRResults1.Revision = revNo.ToUpper();
+                                oCRResults1.Page_No = pageNo;
+                                oCRResults1.BaloonDrwFileID = desFile;
+                                oCRResults1.ProductionOrderNumber = "N/A";
+                                oCRResults1.Part_Revision = "N/A";
+                                oCRResults1.Balloon = Convert.ToString(string.Join(".", Convert.ToInt16(balincid), cnt));
+                                oCRResults1.Spec = ocrtext.ToString();
+                                oCRResults1.Nominal = Nominal;
+                                oCRResults1.Minimum = Min;
+                                oCRResults1.Maximum = Max;
+                                oCRResults1.MeasuredBy = createdby;
+                                oCRResults1.MeasuredOn = DateTime.Now;
+                                if (searchForm.selectedRegion == "Selected Region")
+                                {
+                                    oCRResults1.Crop_X_Axis = (int)ii.X_Axis + (int)s_x - 100;
+                                    oCRResults1.Crop_Y_Axis = (int)ii.Y_Axis + (int)s_y - 100;
+                                    oCRResults1.Crop_Width = (int)ii.Width + (int)s_w;
+                                    oCRResults1.Crop_Height = (int)ii.Height + (int)s_h;
+                                    oCRResults1.Circle_X_Axis = (int)ii.X_Axis + (int)s_x - 100;
+                                    oCRResults1.Circle_Y_Axis = (int)ii.Y_Axis + (int)s_y - 100;
+                                    oCRResults1.Circle_Width = 28;
+                                    oCRResults1.Circle_Height = 28;
+                                }
+                                else
+                                {
+                                    if (ii.X_Axis < 28)
+                                    {
+                                        oCRResults1.Crop_X_Axis = (int)ii.X_Axis + 29;
+                                        oCRResults1.Circle_X_Axis = (int)ii.X_Axis + 29;
+                                    }
+                                    else
+                                    {
+                                        oCRResults1.Crop_X_Axis = (int)ii.X_Axis;
+                                        oCRResults1.Circle_X_Axis = (int)ii.X_Axis;
+                                    }
+                                    oCRResults1.Crop_Y_Axis = ii.Y_Axis;
+                                    oCRResults1.Crop_Width = ii.Width;
+                                    oCRResults1.Crop_Height = ii.Height;
+                                    oCRResults1.Circle_Y_Axis = (int)ii.Y_Axis;
+                                    oCRResults1.Circle_Width = 28;
+                                    oCRResults1.Circle_Height = 28;
+                                }
+                                oCRResults1.Type = Type;
+                                oCRResults1.SubType = SubType;
+                                oCRResults1.Unit = Unit;
+                                oCRResults1.Quantity = (int)beforeqty;
+                                if (Min != "" && Max != "")
+                                {
+                                    oCRResults1.ToleranceType = ToleranceType;
+                                }
+                                else
+                                {
+                                    oCRResults1.ToleranceType = "Default";
+                                }
+                                if (ocrtext.Contains("R."))
+                                {
+                                    oCRResults1.ToleranceType = "Linear";
+                                }
+
+                                oCRResults1.PlusTolerance = PlusTolerance;
+                                oCRResults1.MinusTolerance = MinusTolerance;
+                                oCRResults1.MaxTolerance = "";
+                                oCRResults1.MinTolerance = "";
+                                oCRResults1.CreatedBy = createdby;
+                                oCRResults1.CreatedDate = DateTime.Now;
+                                oCRResults1.ModifiedBy = "";
+                                oCRResults1.ModifiedDate = DateTime.Now;
+                                DrawCircle objDrawCircle = new DrawCircle();
+                                oCRResults1.x = ii.X_Axis;
+                                oCRResults1.y = ii.Y_Axis;
+                                oCRResults1.width = ii.Width;
+                                oCRResults1.height = ii.Height;
+                                oCRResults1.id = "";
+                                oCRResults1.selectedRegion = "Full Image";
+                                if (isplmin && isplmin_mintol != "" && isplmin_pltol != "" && isplmin_spec != "")
+                                {
+                                    oCRResults1.Spec = isplmin_spec;
+                                    oCRResults1.Nominal = isplmin_spec;
+                                    try
+                                    {
+                                        oCRResults1.Minimum = Convert.ToString(Convert.ToDecimal(isplmin_spec.Replace("¡", "")) - Convert.ToDecimal(isplmin_mintol));
+                                        oCRResults1.Maximum = Convert.ToString(Convert.ToDecimal(isplmin_spec.Replace("¡", "")) + Convert.ToDecimal(isplmin_pltol));
+                                        oCRResults1.MinusTolerance = Convert.ToString(isplmin_mintol);
+                                        oCRResults1.PlusTolerance = Convert.ToString(isplmin_pltol);
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
+                                    oCRResults1.ToleranceType = "Linear";
+                                    oCRResults1.Type = "Dimension";
+                                    oCRResults1.Unit = "Inches";
+                                    oCRResults1.SubType = "Circularity";
+                                }
+                                lstoCRResults.Add(oCRResults1);
+                            }
+                            isplmin = false;
+                            isplmin_mintol = "";
+                            isplmin_pltol = "";
+                            isplmin_spec = "";
+                            ij++;
+                            beforeqty = 1;
+                            foreach (var jj in auto_ocrresults.Where(r => r.No == ii.No))
+                            {
+                                jj.Qty = 1;
+                            }
+                        }
+                        else
+                        {
+                            var hdrnew1 = auto_ocrresults.Where(w => (w.Y_Axis == ii.Y_Axis + 21)).FirstOrDefault();
+                            if (hdrnew1 != null)
+                            {
+                                ballondrawedno = hdrnew1.No;
+                            }
+                            if (ballondrawedno > 0 && ii.No == ballondrawedno && ii.Ocr_Text.Contains("+"))
+                            {
+                                ballondrawedno = 0;
+                                continue;
+                            }
+                            oCRResults.BaloonDrwID = 0;
+                            oCRResults.DrawingNumber = drawingNo;
+                            oCRResults.Revision = revNo.ToUpper();
+                            oCRResults.Page_No = pageNo;
+                            oCRResults.BaloonDrwFileID = desFile;
+                            oCRResults.ProductionOrderNumber = "N/A";
+                            oCRResults.Part_Revision = "N/A";
+                            oCRResults.Balloon = Convert.ToString(Convert.ToInt16(balincid));
+                            oCRResults.Spec = ocrtext.ToString();
+                            oCRResults.Nominal = Nominal;
+                            oCRResults.Minimum = Min;
+                            oCRResults.Maximum = Max;
+                            oCRResults.MeasuredBy = createdby;
+                            oCRResults.MeasuredOn = DateTime.Now;
+                            if (searchForm.selectedRegion == "Selected Region")
+                            {
+                                oCRResults.Crop_X_Axis = (int)ii.X_Axis + (int)s_x - 100;
+                                oCRResults.Crop_Y_Axis = (int)ii.Y_Axis + (int)s_y - 100;
+                                oCRResults.Crop_Width = (int)ii.Width + (int)s_w;
+                                oCRResults.Crop_Height = (int)ii.Height + (int)s_h;
+                                oCRResults.Circle_X_Axis = (int)ii.X_Axis + (int)s_x - 100;
+                                oCRResults.Circle_Y_Axis = (int)ii.Y_Axis + (int)s_y - 100;
+                                oCRResults.Circle_Width = (int)ii.Width + (int)s_w;
+                                oCRResults.Circle_Height = (int)ii.Height + (int)s_h;
+                            }
+                            else
+                            {
+                                if (ii.X_Axis < 28)
+                                {
+                                    oCRResults.Crop_X_Axis = (int)ii.X_Axis + 29;
+                                    oCRResults.Circle_X_Axis = (int)ii.X_Axis + +29;
+                                }
+                                else
+                                {
+                                    oCRResults.Crop_X_Axis = (int)ii.X_Axis;
+                                    oCRResults.Circle_X_Axis = (int)ii.X_Axis;
+                                }
+                                oCRResults.Crop_Y_Axis = ii.Y_Axis;
+                                oCRResults.Crop_Width = ii.Width;
+                                oCRResults.Crop_Height = ii.Height;
+                                oCRResults.Circle_Y_Axis = (int)ii.Y_Axis;
+                                oCRResults.Circle_Width = (int)ii.Width;
+                                oCRResults.Circle_Height = (int)ii.Height;
+                            }
+                            oCRResults.Type = Type;
+                            oCRResults.SubType = SubType;
+                            oCRResults.Unit = Unit;
+                            oCRResults.Quantity = (int)Num_Qty;
+                            if (Min != "" && Max != "")
+                            {
+                                oCRResults.ToleranceType = ToleranceType;
+                            }
+                            else
+                            {
+                                oCRResults.ToleranceType = "Default";
+                            }
+                            if (ocrtext.Contains("R."))
+                            {
+                                oCRResults.ToleranceType = "Linear";
+                            }
+                            oCRResults.PlusTolerance = PlusTolerance;
+                            oCRResults.MinusTolerance = MinusTolerance;
+                            oCRResults.MaxTolerance = "";
+                            oCRResults.MinTolerance = "";
+                            oCRResults.CreatedBy = createdby;
+                            oCRResults.CreatedDate = DateTime.Now;
+                            oCRResults.ModifiedBy = "";
+                            oCRResults.ModifiedDate = DateTime.Now;
+                            oCRResults.x = ii.X_Axis;
+                            oCRResults.y = ii.Y_Axis;
+                            oCRResults.width = ii.Width;
+                            oCRResults.height = ii.Height;
+                            oCRResults.id = "";
+                            oCRResults.selectedRegion = "Full Image";
+                            if (isplmin && isplmin_mintol != "" && isplmin_pltol != "" && isplmin_spec != "")
+                            {
+                                oCRResults.Spec = isplmin_spec;
+                                oCRResults.Nominal = isplmin_spec;
+                                try
+                                {
+                                    oCRResults.Minimum = Convert.ToString(Convert.ToDecimal(isplmin_spec.Replace("¡", "")) - Convert.ToDecimal(isplmin_mintol));
+                                    oCRResults.Maximum = Convert.ToString(Convert.ToDecimal(isplmin_spec.Replace("¡", "")) + Convert.ToDecimal(isplmin_pltol));
+                                    oCRResults.MinusTolerance = Convert.ToString(isplmin_mintol);
+                                    oCRResults.PlusTolerance = Convert.ToString(isplmin_pltol);
+                                }
+                                catch (Exception)
+                                {
+
+                                }
+                                oCRResults.ToleranceType = "Linear";
+                                oCRResults.Type = "Dimension";
+                                oCRResults.Unit = "Inches";
+                                oCRResults.SubType = "Circularity";
+                                isplmin = false;
+                                isplmin_mintol = "";
+                                isplmin_pltol = "";
+                                isplmin_spec = "";
+                            }
+                            lstoCRResults.Add(oCRResults);
+
+                            ij++;
+                        }
+                    }
+                }
+
+                if (searchForm.selectedRegion == "Selected Region")
+                {
+                    System.IO.File.Delete(temp);
+                }
+                System.IO.File.Delete(processImageFile);
+                // System.IO.File.Delete(SelImageFile);
+                System.IO.File.Delete(ImageFile);
+
+                IEnumerable<object> returnObject = new List<object>();
+                BubbleDrawingAutomationWeb.Controllers.BalloonController balcon = new BubbleDrawingAutomationWeb.Controllers.BalloonController(_dbcontext);
+                BubbleDrawingAutomationWeb.Controllers.CreateBalloon objbaldet = new BubbleDrawingAutomationWeb.Controllers.CreateBalloon();
+                objbaldet.drawingNo = searchForm.CdrawingNo;
+                objbaldet.revNo = searchForm.CrevNo;
+                objbaldet.totalPage = searchForm.totalPage;
+                objbaldet.pageNo = searchForm.pageNo;
+                objbaldet.rotate = searchForm.rotate;
+                objbaldet.ballonDetails = lstoCRResults;
+                returnObject = balcon.create(objbaldet);
+
+
+                return StatusCode(StatusCodes.Status200OK, returnObject);
+
+            }
+
+        }
+        private List<object> Save(List<OCRResults> lstoCRResults, AutoBalloon searchForm, string Action, Int64 ballonno)
+        {
+            var returnObject = new List<object>();
+            int Total_Page_No = 0;
+            int PageNo = 0;
+            try
+            {
+                Total_Page_No = searchForm.totalPage;
+                PageNo = searchForm.pageNo;
+            }
+            catch (FormatException)
+            {
+                throw new Exception();
+            }
+            DataTable dt = new DataTable();
+            dt = ToDataTable(lstoCRResults);
+            List<string> listtoRemove = new List<string> { "id", "selectedRegion", "x", "y", "width", "height", "ocrImageFileName", "isballooned" };
+            for (int i = dt.Columns.Count - 1; i >= 0; i--)
+            {
+                DataColumn dc = dt.Columns[i];
+                if (listtoRemove.Contains(dc.ColumnName))
+                {
+                    dt.Columns.Remove(dc);
+                }
+            }
+            var hdr = _dbcontext.TblBaloonDrawingHeaders.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Revision == searchForm.CrevNo.ToString()).FirstOrDefault();
+
+            if (hdr == null)
+            {
+                var hdrtable = _dbcontext.TblBaloonDrawingHeaders;
+                TblBaloonDrawingHeader tblhdr = new TblBaloonDrawingHeader();
+                tblhdr.DrawingNumber = searchForm.CdrawingNo;
+                tblhdr.Revision = searchForm.CrevNo;
+                tblhdr.ProductionOrderNumber = "N/A";
+                tblhdr.Part_Revision = "N/A";
+                tblhdr.Total_Page_No = searchForm.totalPage;
+                tblhdr.RotateProperties = searchForm.rotate;
+                tblhdr.CreatedDate = DateTime.Now;
+                tblhdr.ModifiedDate = DateTime.Now;
+                tblhdr.CreatedBy = username;
+                tblhdr.ModifiedBy = username;
+                hdrtable.Add(tblhdr);
+                _dbcontext.SaveChanges();
+            }
+            else
+            {
+                var lnritems = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Revision == searchForm.CrevNo.ToString()).FirstOrDefault();
+                if (lnritems != null)
+                {
+                    List<TblBaloonDrawingLiner> lnritem = new List<TblBaloonDrawingLiner>();
+                    foreach (var i in lnritem)
+                    {
+                        _dbcontext.TblBaloonDrawingLiners.Remove(i);
+                    }
+                    _dbcontext.SaveChanges();
+                }
+            }
+            byte[] imgbyt = new byte[] { 0x20 };
+            List<TblBaloonDrawingLiner> lnr = new List<TblBaloonDrawingLiner>();
+            foreach (var i in lstoCRResults)
+            {
+
+                lnr.Add(new TblBaloonDrawingLiner
+                {
+                    BaloonDrwID = hdr.BaloonDrwID,
+                    BaloonDrwFileID = i.BaloonDrwFileID,
+                    ProductionOrderNumber = i.ProductionOrderNumber,
+                    Part_Revision = i.Part_Revision,
+                    Page_No = i.Page_No,
+                    DrawingNumber = i.DrawingNumber,
+                    Revision = i.Revision,
+                    Balloon = i.Balloon,
+                    Spec = i.Spec,
+                    Nominal = i.Nominal,
+                    Minimum = i.Minimum,
+                    Maximum = i.Maximum,
+                    MeasuredBy = i.MeasuredBy,
+                    MeasuredOn = i.MeasuredOn,
+                    Circle_X_Axis = i.Circle_X_Axis,
+                    Circle_Y_Axis = i.Crop_Y_Axis,
+                    Circle_Width = i.Circle_Width,
+                    Circle_Height = i.Circle_Height,
+                    Balloon_Thickness = i.Balloon_Thickness,
+                    Balloon_Text_FontSize = i.Balloon_Text_FontSize,
+                    ZoomFactor = i.ZoomFactor,
+                    Crop_X_Axis = i.Crop_X_Axis,
+                    Crop_Y_Axis = i.Crop_Y_Axis,
+                    Crop_Width = i.Crop_Width,
+                    Crop_Height = i.Crop_Height,
+                    Type = i.Type,
+                    SubType = i.SubType,
+                    Unit = i.Unit,
+                    Quantity = i.Quantity,
+                    ToleranceType = i.ToleranceType,
+                    PlusTolerance = i.PlusTolerance,
+                    MinusTolerance = i.MinusTolerance,
+                    MinTolerance = i.MinTolerance,
+                    MaxTolerance = i.MaxTolerance,
+                    CropImage = imgbyt,
+                    CreatedBy = i.CreatedBy,
+                    CreatedDate = i.CreatedDate,
+                    ModifiedBy = i.ModifiedBy,
+                    ModifiedDate = i.ModifiedDate,
+                    IsCritical = i.IsCritical
+                });
+
+            }
+            _dbcontext.TblBaloonDrawingLiners.AddRange(lnr);
+            _dbcontext.SaveChanges();
+
+            var result = _dbcontext.TblBaloonDrawingLiners
+                  .Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Revision == searchForm.CrevNo.ToString())
+                  .ToList();
+            returnObject.Add(result);
+            return returnObject;
+        }
+
+        [HttpPost]
+        [Route("manualprocess")]
+        public async Task<ActionResult<AutoBalloon>> manualprocess(AutoBalloon searchForm)
+        {
+            OCRResults oCRResults = new OCRResults();
+
+            if (_dbcontext.TblConfigurations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                List<OCRResults> request = searchForm.annotation;
+                oCRResults = new OCRResults();
+                int totalPage = searchForm.totalPage;
+                int pageNo = searchForm.pageNo;
+                foreach (var obj in request)
+                {
+                    string dtFiles = searchForm.drawingDetails;
+                    string OriginalImage = dtFiles;
+                    System.Drawing.Image oimage = System.Drawing.Image.FromFile(OriginalImage);
+                    System.Drawing.Rectangle rect = new System.Drawing.Rectangle((int)obj.x, (int)obj.y, (int)obj.width, (int)obj.height);
+                    System.Drawing.Image crop = BubbleDrawing.CommonMethods.cropImage(oimage, rect);
+                    string fname = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"text_region_{obj.id}.png");
+                    crop.Save(fname, System.Drawing.Imaging.ImageFormat.Png);
+                    using (var pix = Tesseract.Pix.LoadFromFile(fname))
+                    {
+                        using (var page = OcrEngine.Instance.Process(pix, Tesseract.PageSegMode.SingleBlock))
+                        {
+                            var confidence = page.GetMeanConfidence();
+                            if (confidence >= 0.6f)
+                            {
+                                var regionText = EvaluateText(page.GetText());
+                                string Min, Max, Nominal, Type, SubType, Unit, ToleranceType, PlusTolerance, MinusTolerance;
+                                BubbleDrawing.CommonMethods cmt = new BubbleDrawing.CommonMethods();
+                                cmt.GetMinMaxValues(regionText.Trim(), out Min, out Max, out Nominal, out Type, out SubType, out Unit, out ToleranceType, out PlusTolerance, out MinusTolerance);
+                                int Num_Qty = 1;
+                                if (regionText.Contains("X"))
+                                {
+                                    string qty = regionText.Substring(0, regionText.IndexOf("X")).Replace(" ", "");
+                                    int value;
+                                    if (int.TryParse(qty, out value))
+                                        Num_Qty = Convert.ToInt16(qty);
+                                }
+
+                                System.Drawing.RectangleF rectElipse = new System.Drawing.RectangleF((float)obj.x, (float)obj.y, (float)obj.width, (float)obj.height);
+
+                                //  oCRResults.Bounds = rectElipse;
+                                oCRResults.BaloonDrwID = 0;
+                                oCRResults.DrawingNumber = obj.DrawingNumber;
+                                oCRResults.Revision = obj.Revision.ToUpper();
+                                oCRResults.Page_No = obj.Page_No;
+                                oCRResults.Balloon = obj.Balloon;
+                                oCRResults.Spec = regionText.ToString();
+                                oCRResults.Nominal = Nominal;
+                                oCRResults.Minimum = Min;
+                                oCRResults.Maximum = Max;
+                                oCRResults.MeasuredBy = "Admin";
+                                oCRResults.MeasuredOn = DateTime.Now;
+                                oCRResults.Crop_X_Axis = obj.x;
+                                oCRResults.Crop_Y_Axis = obj.y;
+                                oCRResults.Crop_Width = obj.width;
+                                oCRResults.Crop_Height = obj.height;
+                                oCRResults.Type = Type;
+                                oCRResults.SubType = SubType;
+                                oCRResults.Unit = Unit;
+                                oCRResults.Quantity = (int)Num_Qty;
+                                oCRResults.ToleranceType = ToleranceType;
+                                oCRResults.PlusTolerance = PlusTolerance;
+                                oCRResults.MinusTolerance = MinusTolerance;
+                                oCRResults.MaxTolerance = "";
+                                oCRResults.MinTolerance = "";
+                                oCRResults.CreatedBy = "Admin";
+                                oCRResults.CreatedDate = DateTime.Now;
+                                oCRResults.ModifiedBy = "";
+                                oCRResults.ModifiedDate = DateTime.Now;
+
+                                oCRResults.BaloonDrwFileID = fname;
+                                oCRResults.x = obj.x;
+                                oCRResults.y = obj.y;
+                                oCRResults.width = obj.width;
+                                oCRResults.height = obj.height;
+                                oCRResults.id = obj.id;
+                                oCRResults.selectedRegion = obj.selectedRegion;
+
+                            }
+                        }
+                    }
+                }
+
+                List<OCRResults> lst = new List<OCRResults>();
+                lst.Add(oCRResults);
+                var returnObject = new List<object>();
+                returnObject = Save(lst, searchForm, "Save", 0);
+                //  returnObject.Add(oCRResults);
+                return StatusCode(StatusCodes.Status200OK, returnObject);
+            }
+
+        }
+
+        [HttpPost]
+        [Route("saveBalloons")]
+        public async Task<ActionResult<AutoBalloon>> saveBalloons(AutoBalloon searchForm)
+        {
+
+            if (_dbcontext.TblConfigurations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                List<OCRResults> lstoCRResults = new List<OCRResults>();
+                lstoCRResults = searchForm.originalRegions;
+
+
+                IEnumerable<object> returnObject = new List<object>();
+                BubbleDrawingAutomationWeb.Controllers.BalloonController balcon = new BubbleDrawingAutomationWeb.Controllers.BalloonController(_dbcontext);
+                BubbleDrawingAutomationWeb.Controllers.CreateBalloon objbaldet = new BubbleDrawingAutomationWeb.Controllers.CreateBalloon();
+                objbaldet.drawingNo = searchForm.CdrawingNo;
+                objbaldet.revNo = searchForm.CrevNo;
+                objbaldet.totalPage = searchForm.totalPage;
+                objbaldet.pageNo = searchForm.pageNo;
+                objbaldet.ballonDetails = lstoCRResults;
+
+                returnObject = balcon.update(objbaldet);
+                return StatusCode(StatusCodes.Status200OK, returnObject);
+
+            }
+        }
+
+        [HttpPost]
+        [Route("resetBalloons")]
+        public async Task<ActionResult<ResetBalloon>> resetBalloons(ResetBalloon searchForm)
+        {
+            if (_dbcontext.TblConfigurations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                IEnumerable<object> returnObject = new List<object>();
+                var query = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Page_No == searchForm.pageNo && w.Revision == searchForm.CrevNo.ToString()).Count();
+                if (query > 0)
+                {
+                    List<TblBaloonDrawingLiner> rList = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Page_No == searchForm.pageNo && w.Revision == searchForm.CrevNo.ToString()).ToList();
+                    _dbcontext.TblBaloonDrawingLiners.RemoveRange(rList);
+                    _dbcontext.SaveChanges();
+                    var oquery = _dbcontext.TblBaloonDrawingLiners
+                   .Where(p => p.DrawingNumber == searchForm.CdrawingNo.ToString() && p.Revision == searchForm.CrevNo.ToString()).ToList();
+                    var test = oquery.OrderBy(f => f.DrawLineID).Select(e => new { sl = e.Balloon.Contains(".") ? Convert.ToInt64(e.Balloon.Substring(0, e.Balloon.IndexOf("."))) : Convert.ToInt64(e.Balloon), DrawLineID = e.DrawLineID }).DistinctBy(i => i.sl).ToList();
+
+                    var oquery1 = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Page_No != searchForm.pageNo && w.Revision == searchForm.CrevNo.ToString()).OrderBy(f => f.Page_No).ToList();
+                    if (oquery1.Count() > 0)
+                    {
+                        Int64 j = 1;
+                        foreach (var i in test.OrderBy(f => f.DrawLineID).ToList())
+                        {
+                            var ck = _dbcontext.TblBaloonDrawingLiners
+                                .Where(p => p.DrawingNumber == searchForm.CdrawingNo.ToString())
+                                .Where(p => p.Revision == searchForm.CrevNo.ToString())
+                                .Where(p => p.DrawLineID == i.DrawLineID)
+                                .Where(p => p.Balloon.Contains(i.sl + "."))
+                                .OrderBy(f => f.DrawLineID)
+                                .ToList();
+
+                            if (ck.Count() > 0)
+                            {
+                                var inner = _dbcontext.TblBaloonDrawingLiners
+                                .Where(p => p.DrawingNumber == searchForm.CdrawingNo.ToString())
+                                .Where(p => p.Revision == searchForm.CrevNo.ToString())
+                                .Where(p => p.Balloon.Contains(i.sl + "."))
+                                .OrderBy(f => f.DrawLineID)
+                                .ToList();
+                                Int64 k = 1;
+                                foreach (var o in inner)
+                                {
+                                    TblBaloonDrawingLiner liner = _dbcontext.TblBaloonDrawingLiners.Where(f => f.DrawLineID == o.DrawLineID).FirstOrDefault();
+                                    if (liner == null) throw new Exception("");
+                                    liner.Balloon = j.ToString() + "." + k.ToString();
+                                    k++;
+                                    _dbcontext.SaveChanges();
+
+                                }
+                            }
+                            else
+                            {
+                                TblBaloonDrawingLiner liner = _dbcontext.TblBaloonDrawingLiners.Where(f => f.DrawLineID == i.DrawLineID).FirstOrDefault();
+                                if (liner == null) throw new Exception("");
+                                liner.Balloon = j.ToString();
+                            }
+                            j++;
+
+                            _dbcontext.SaveChanges();
+
+                        }
+                        //foreach (var i in oquery )
+                        //{
+                        //    TblBaloonDrawingLiner liner = _dbcontext.TblBaloonDrawingLiners.Where(f => f.Balloon == i.Balloon).FirstOrDefault();
+                        //    if (liner == null) throw new Exception("");
+                        //    liner.Balloon = j.ToString();
+                        //    _dbcontext.SaveChanges();
+                        //    j++;
+                        //}
+                    }
+                }
+                else
+                {
+                    var oquery = _dbcontext.TblBaloonDrawingLiners
+                  .Where(p => p.DrawingNumber == searchForm.CdrawingNo.ToString() && p.Revision == searchForm.CrevNo.ToString()).ToList();
+                    var test = oquery.OrderBy(f => f.DrawLineID).Select(e => new { sl = e.Balloon.Contains(".") ? Convert.ToInt64(e.Balloon.Substring(0, e.Balloon.IndexOf("."))) : Convert.ToInt64(e.Balloon), DrawLineID = e.DrawLineID }).DistinctBy(i => i.sl).ToList();
+
+                    var oquery1 = _dbcontext.TblBaloonDrawingLiners.Where(w => w.DrawingNumber == searchForm.CdrawingNo.ToString() && w.Page_No != searchForm.pageNo && w.Revision == searchForm.CrevNo.ToString()).OrderBy(f => f.Page_No).ToList();
+                    if (oquery1.Count() > 0)
+                    {
+                        Int64 j = 1;
+                        foreach (var i in test.OrderBy(f => f.DrawLineID).ToList())
+                        {
+                            var ck = _dbcontext.TblBaloonDrawingLiners
+                                .Where(p => p.DrawingNumber == searchForm.CdrawingNo.ToString())
+                                .Where(p => p.Revision == searchForm.CrevNo.ToString())
+                                .Where(p => p.DrawLineID == i.DrawLineID)
+                                .Where(p => p.Balloon.Contains(i.sl + "."))
+                                .OrderBy(f => f.DrawLineID)
+                                .ToList();
+
+                            if (ck.Count() > 0)
+                            {
+                                var inner = _dbcontext.TblBaloonDrawingLiners
+                                .Where(p => p.DrawingNumber == searchForm.CdrawingNo.ToString())
+                                .Where(p => p.Revision == searchForm.CrevNo.ToString())
+                                .Where(p => p.Balloon.Contains(i.sl + "."))
+                                .OrderBy(f => f.DrawLineID)
+                                .ToList();
+                                Int64 k = 1;
+                                foreach (var o in inner)
+                                {
+                                    TblBaloonDrawingLiner liner = _dbcontext.TblBaloonDrawingLiners.Where(f => f.DrawLineID == o.DrawLineID).FirstOrDefault();
+                                    if (liner == null) throw new Exception("");
+                                    liner.Balloon = j.ToString() + "." + k.ToString();
+                                    k++;
+                                    _dbcontext.SaveChanges();
+
+                                }
+                            }
+                            else
+                            {
+                                TblBaloonDrawingLiner liner = _dbcontext.TblBaloonDrawingLiners.Where(f => f.DrawLineID == i.DrawLineID).FirstOrDefault();
+                                if (liner == null) throw new Exception("");
+                                liner.Balloon = j.ToString();
+                            }
+                            j++;
+
+                            _dbcontext.SaveChanges();
+
+                        }
+                        //    foreach (var i in oquery)
+                        //    {
+                        //        TblBaloonDrawingLiner liner = _dbcontext.TblBaloonDrawingLiners.Where(f => f.Balloon == i.Balloon).FirstOrDefault();
+                        //        if (liner == null) throw new Exception("");
+                        //        liner.Balloon = j.ToString();
+                        //        _dbcontext.SaveChanges();
+                        //        j++;
+                        //    }
+                    }
+                }
+
+                BubbleDrawingAutomationWeb.Controllers.BalloonController balcon = new BubbleDrawingAutomationWeb.Controllers.BalloonController(_dbcontext);
+                returnObject = balcon.get(searchForm.CdrawingNo, searchForm.CrevNo);
+                return StatusCode(StatusCodes.Status200OK, returnObject);
+            }
+
+        }
+
+        [HttpPost]
+        [Route("deleteBalloons")]
+        public async Task<ActionResult<DeleteBalloon>> deleteBalloons(DeleteBalloon searchForm)
+        {
+            if (_dbcontext.TblConfigurations == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                IEnumerable<object> returnObject = new List<object>();
+                BubbleDrawingAutomationWeb.Controllers.BalloonController balcon = new BubbleDrawingAutomationWeb.Controllers.BalloonController(_dbcontext);
+                BubbleDrawingAutomationWeb.Controllers.DeleteBalloon objbaldet = new BubbleDrawingAutomationWeb.Controllers.DeleteBalloon();
+                objbaldet.drawingNo = searchForm.drawingNo;
+                objbaldet.revNo = searchForm.revNo;
+                objbaldet.totalPage = searchForm.totalPage;
+                objbaldet.pageNo = searchForm.pageNo;
+                objbaldet.deleteItem = searchForm.deleteItem;
+
+                //balcon.create(balcon.c)
+                returnObject = balcon.delete(objbaldet);
+                return StatusCode(StatusCodes.Status200OK, returnObject);
+            }
+
+        }
+
+        [HttpPost("rotate")]
+        public IActionResult RotateImage(RotateBalloon searchForm)
+        {
+
+            string dtFiles = searchForm.drawingDetails;
+            int rotation = searchForm.rotation;
+            // RemoveOpaqueColormapFrom1BPP(dtFiles);
+            string env = this._appSettings.ENVIRONMENT;
+            string clientPath = envcpath + "\\" + "ClientApp\\src\\drawing" + "\\";
+            if (env != "development")
+            {
+                clientPath = clientPath + "\\" + searchForm.sessionUserId + "\\";
+                if (!Directory.Exists(clientPath))
+                {
+                    Directory.CreateDirectory(clientPath);
+                }
+            }
+            FileInfo fi = new FileInfo(dtFiles);
+            string desFile = fi.Name.Replace(fi.Extension, "") + ".png";
+            string OrgPath = dtFiles;
+            if (env != "development")
+            {
+                OrgPath = dtFiles.Replace(desFile, "") + "\\drawing\\" + desFile;
+            }
+            string clientImg = clientPath + desFile;
+            string ImageFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + desFile);
+            System.IO.File.Copy(OrgPath, ImageFile, true);
+            if (dtFiles == null || dtFiles == "")
+            {
+                return BadRequest("No file found.");
+            }
+            RotateImagefile(ImageFile, rotation);
+            System.Drawing.Bitmap.FromFile(ImageFile).Save(clientImg, System.Drawing.Imaging.ImageFormat.Png);
+            List<object> returnObject = new List<object>();
+            returnObject.Add(desFile);
+            return StatusCode(StatusCodes.Status200OK, returnObject);
+
+        }
+
+        [HttpPost("specificationUpdate")]
+        public IActionResult specificationUpdate(Spec i)
+        {
+
+            string Min, Max, Nominal, Type, SubType, Unit, ToleranceType, PlusTolerance, MinusTolerance;
+            BubbleDrawing.CommonMethods cmt = new BubbleDrawing.CommonMethods();
+            cmt.GetMinMaxValues(i.spec.Trim(), out Min, out Max, out Nominal, out Type, out SubType, out Unit, out ToleranceType, out PlusTolerance, out MinusTolerance);
+            string Num_Qty = "1";
+            if (i.spec.Contains("X"))
+            {
+                string qty = i.spec.Substring(0, i.spec.IndexOf("X")).Replace(" ", "");
+                int value;
+                if (int.TryParse(qty, out value))
+                    Num_Qty = Convert.ToString(qty);
+            }
+            var dataList = new List<KeyValuePair<string, string>>();
+
+            // Adding data to the list
+            dataList.Add(new KeyValuePair<String, String>("Min", Min));
+            dataList.Add(new KeyValuePair<String, String>("Max", Max));
+            dataList.Add(new KeyValuePair<String, String>("Nominal", Nominal));
+            dataList.Add(new KeyValuePair<String, String>("Type", Type));
+            dataList.Add(new KeyValuePair<String, String>("SubType", SubType));
+            dataList.Add(new KeyValuePair<String, String>("Unit", Unit));
+            dataList.Add(new KeyValuePair<String, String>("ToleranceType", ToleranceType));
+            dataList.Add(new KeyValuePair<String, String>("PlusTolerance", PlusTolerance));
+            dataList.Add(new KeyValuePair<String, String>("MinusTolerance", MinusTolerance));
+            dataList.Add(new KeyValuePair<String, String>("Num_Qty", Num_Qty));
+
+            return StatusCode(StatusCodes.Status200OK, dataList);
+
+        }
+
+    }
+
+
+
+
+}
+
+

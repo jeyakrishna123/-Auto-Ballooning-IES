@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/HesCapeWS" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/HesCapeWS" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="MxFileFormats">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NotSet" />
+      <xs:enumeration value="Access" />
+      <xs:enumeration value="AltiumPCAD" />
+      <xs:enumeration value="AutoCAD" />
+      <xs:enumeration value="BatchTIF" />
+      <xs:enumeration value="BITMAP" />
+      <xs:enumeration value="Cadds5" />
+      <xs:enumeration value="CadStar" />
+      <xs:enumeration value="CAMWorks" />
+      <xs:enumeration value="CDF" />
+      <xs:enumeration value="CorelDraw" />
+      <xs:enumeration value="DesignSpace" />
+      <xs:enumeration value="EdgeCAM" />
+      <xs:enumeration value="eDrawing" />
+      <xs:enumeration value="eSearch" />
+      <xs:enumeration value="Esprit" />
+      <xs:enumeration value="Excel" />
+      <xs:enumeration value="FlowChart" />
+      <xs:enumeration value="FrameMaker" />
+      <xs:enumeration value="GIF" />
+      <xs:enumeration value="GZero" />
+      <xs:enumeration value="Helix" />
+      <xs:enumeration value="IGES" />
+      <xs:enumeration value="JPEG" />
+      <xs:enumeration value="JPG" />
+      <xs:enumeration value="MathCAD" />
+      <xs:enumeration value="MATLAB" />
+      <xs:enumeration value="MatrixWorks" />
+      <xs:enumeration value="ME10" />
+      <xs:enumeration value="Microstation" />
+      <xs:enumeration value="Orcad" />
+      <xs:enumeration value="Outlook" />
+      <xs:enumeration value="PADS" />
+      <xs:enumeration value="PAR" />
+      <xs:enumeration value="ParaCAD" />
+      <xs:enumeration value="Parasolid" />
+      <xs:enumeration value="PcadMasterDesigner" />
+      <xs:enumeration value="PDF" />
+      <xs:enumeration value="POSTSCRIPT" />
+      <xs:enumeration value="PowerPoint" />
+      <xs:enumeration value="ProE" />
+      <xs:enumeration value="Project" />
+      <xs:enumeration value="Relex" />
+      <xs:enumeration value="Schema" />
+      <xs:enumeration value="Solidworks" />
+      <xs:enumeration value="SureTrak" />
+      <xs:enumeration value="SWPrograms" />
+      <xs:enumeration value="Tango" />
+      <xs:enumeration value="TestExe" />
+      <xs:enumeration value="Text" />
+      <xs:enumeration value="TIF" />
+      <xs:enumeration value="Unigraphics" />
+      <xs:enumeration value="Unspecified" />
+      <xs:enumeration value="Visio" />
+      <xs:enumeration value="Word" />
+      <xs:enumeration value="XML" />
+      <xs:enumeration value="Zip" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="MxFileFormats" nillable="true" type="tns:MxFileFormats" />
+</xs:schema>
