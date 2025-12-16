@@ -2092,21 +2092,21 @@ namespace BubbleDrawingAutomationWeb.Controllers
                     {
                         if (IsCrypto.ToLower() == "yes")
                         {
-                            connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + "" + ";Password=" + Decrypt(Convert.ToString(dtMPM.Rows[0]["Password"])) + "";
+                            connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + ";Password=" + Decrypt(Convert.ToString(dtMPM.Rows[0]["Password"])) + ";TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;";
                         }
                         else
                         {
-                            connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + "" + ";Password=" + (Convert.ToString(dtMPM.Rows[0]["Password"])) + "";
+                            connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + ";Password=" + (Convert.ToString(dtMPM.Rows[0]["Password"])) + ";TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;";
                         }
                     }
                     else
                     {
-                        connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + "" + ";Password=" + (Convert.ToString(dtMPM.Rows[0]["Password"])) + "";
+                        connstr = "Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + ";User ID=" + Convert.ToString(dtMPM.Rows[0]["UserID"]) + ";Password=" + (Convert.ToString(dtMPM.Rows[0]["Password"])) + ";TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;";
                     }
                 }
                 else
                 {
-                    connstr = @"Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + "" + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + "" + ";Integrated Security=" + "True" + "";
+                    connstr = @"Data Source=" + Convert.ToString(dtMPM.Rows[0]["Datasource"]) + ";Initial Catalog=" + Convert.ToString(dtMPM.Rows[0]["DBName"]) + ";Integrated Security=True;TrustServerCertificate=True;Encrypt=False;Connection Timeout=30;";
                 }
             }
             return connstr;
